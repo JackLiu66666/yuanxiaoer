@@ -1,0 +1,27 @@
+spring:
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/YX2_demo?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root  # 替换为你的数据库账号
+    password: Lhx20020916  # 替换为你的数据库密码
+  # 解决跨域（前端访问后端需要）
+  web:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+
+# MyBatisPlus 配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.yuanxiaoer.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印SQL日志（开发环境用）
+
+# 端口配置
+server:
+  port: 8081
+  servlet:
+    context-path: /api/v1 # 全局接口前缀
