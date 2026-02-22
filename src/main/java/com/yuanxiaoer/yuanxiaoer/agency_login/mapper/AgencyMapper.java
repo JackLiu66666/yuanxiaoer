@@ -1,0 +1,17 @@
+package com.yuanxiaoer.yuanxiaoer.agency_login.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+/**
+ * 代理商Mapper
+ */
+@Mapper
+public interface AgencyMapper extends BaseMapper<Agency> {
+    /**
+     * 根据手机号/ID/用户名查询代理商
+     */
+    Agency selectByLoginKey(@Param("loginKey") String loginKey);
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper">
+    <!-- 根据手机号/ID/用户名查询代理商 -->
+    <select id="selectByLoginKey" resultType="com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency">
+        SELECT * FROM agency
+        WHERE phone = #{loginKey} 
+        OR id = IF(#{loginKey} REGEXP '^[0-9]+$', #{loginKey}, NULL)
+        OR username = #{loginKey}
+    </select>
+</mapper>
