@@ -6,6 +6,7 @@ import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.service.AgencyService;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * 代理商控制器（RESTful风格）
@@ -29,17 +30,35 @@ public class AgencyController {
      * 登录接口
      */
     @PostMapping("/login")
-    public Result<?> login(@RequestBody LoginDTO loginDTO) {
+    public Result<?> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
         String loginKey = loginDTO.getLoginKey();
         String password = loginDTO.getPassword();
-        return agencyService.login(loginKey, password);
+        Result<?> result = agencyService.login(loginKey, password);
+        // 登录成功，存入Session
+        if (result.getCode() == 200) {
+            Agency agent = (Agency) result.getData();
+            session.setAttribute("loginAgency", agent); // 存入登录用户
+            result.setMsg("登录成功，即将进入代理商界面"); // 重置提示语
+        }
+        return result;
     }
 
     /**
      * 代理商首页（登录后进入）
      */
     @GetMapping("/index")
-    public Result<?> index() {
-        return Result.success("欢迎进入代理商界面，该界面待开发...");
+    public Result<?> index(HttpSession session) {
+        Agency loginAgency = (Agency) session.getAttribute("loginAgency");
+        return Result.success("欢迎 " + loginAgency.getUsername() + " 进入代理商界面，该界面待开发...");
+    }
+
+    /**
+     * 退出登录接口
+     */
+    @GetMapping("/logout")
+    public Result<?> logout(HttpSession session) {
+        session.removeAttribute("loginAgent"); // 移除登录态
+        session.invalidate(); // 销毁Session
+        return Result.success("退出登录成功");
     }
 }

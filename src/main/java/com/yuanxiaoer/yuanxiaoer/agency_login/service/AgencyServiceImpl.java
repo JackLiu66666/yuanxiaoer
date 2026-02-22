@@ -72,7 +72,8 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
         //     return Result.error(auditMsg);
         // }
 
-        // 4. 登录成功（此处仅返回用户信息，实际项目可生成Token）
-        return Result.success("登录成功，即将进入代理商界面");
+        // 4. 登录成功：移除密码，返回用户信息（供存入Session）
+        agency.setPassword(null); // 敏感信息置空
+        return Result.success(agency); // 原代码返回"登录成功..."，现在返回agent对象
     }
 }
