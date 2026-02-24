@@ -1,8 +1,4 @@
 spring:
-  security:
-    user:
-      name: admin
-      password: admin
   autoconfigure:
     exclude:
     - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -21,13 +17,6 @@ spring:
   web:
     resources:
       static-locations: file:./upload/
-    # cors:
-    #   allowed-origins: "*"
-    #   allowed-methods: "*"
-    #   allowed-headers: "*"
-custom:
-  upload:
-    base-path: D:/YX2_demo/upload/                 # 自定义上传路径
 # MyBatisPlus 配置
 mybatis-plus:
   global-config:
@@ -49,5 +38,13 @@ server:
     session:
       timeout: 3600s
       cookie:
+        path: /api/v1
+        same-site: lax
+        secure: false
         http-only: true
 
+upload:
+  # 文件上传根路径（项目根目录下upload）
+  base-path: ${user.dir}/upload/
+  # 访问路径前缀
+  base-url: http://localhost:8080/upload/
