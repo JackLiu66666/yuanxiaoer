@@ -36,8 +36,8 @@ public class AgencyController {
         Result<?> result = agencyService.login(loginKey, password);
         // 登录成功，存入Session
         if (result.getCode() == 200) {
-            Agency agent = (Agency) result.getData();
-            session.setAttribute("loginAgency", agent); // 存入登录用户
+            Agency agency = (Agency) result.getData();
+            session.setAttribute("loginAgency", agency); // 存入登录用户
             result.setMsg("登录成功，即将进入代理商界面"); // 重置提示语
         }
         return result;
@@ -57,7 +57,7 @@ public class AgencyController {
      */
     @GetMapping("/logout")
     public Result<?> logout(HttpSession session) {
-        session.removeAttribute("loginAgent"); // 移除登录态
+        session.removeAttribute("loginAgency"); // 移除登录态
         session.invalidate(); // 销毁Session
         return Result.success("退出登录成功");
     }

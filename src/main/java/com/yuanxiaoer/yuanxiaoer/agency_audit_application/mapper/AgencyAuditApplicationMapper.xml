@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper">
+    <select id="countByAgencyId" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM agency_audit_application 
+        WHERE agency_id = #{agencyId} AND is_deleted = 0
+    </select>
+</mapper>

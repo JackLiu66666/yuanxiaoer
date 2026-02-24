@@ -12,8 +12,9 @@ public class AgencyLoginInterceptor implements HandlerInterceptor {
         Agency loginAgency = (Agency) request.getSession().getAttribute("loginAgency");
         if (loginAgency == null) {
             // 未登录，返回JSON提示
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"code\":401,\"msg\":\"请先登录\",\"data\":null}");
+            response.getWriter().write("{\"code\":401,\"msg\":\"test请先登录\",\"data\":null}");
             return false;
         }
         // 已登录，放行

@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class LoginDTO {
     /**
-     * 管理员账号
+     * 代理商账号loginKey
      */
     private String loginKey;
     /**
