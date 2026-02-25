@@ -12,4 +12,7 @@ public interface AgencyAuditApplicationService extends IService<AgencyAuditAppli
     
     // 检查代理商是否已提交申请
     boolean hasApplied(Long agencyId);
+
+    //根据ID查询申请表单详情
+    AgencyAuditApplication getApplicationById(Long id);
 }

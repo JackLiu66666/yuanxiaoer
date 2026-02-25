@@ -1,6 +1,8 @@
 package com.yuanxiaoer.yuanxiaoer.agency_audit_application.service;
 
 import cn.hutool.core.lang.UUID;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
@@ -31,6 +33,9 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
 
     @Autowired
     private AgencyMapper agencyMapper;
+    @Autowired
+    private AgencyAuditApplicationMapper applicationMapper;
+
     @Override
     @Transactional(rollbackFor = Exception.class)  // 事务注解，任何异常都回滚
     public String submitApplication(AgencyAuditApplication application, MultipartFile sealFile, HttpSession session) {
@@ -97,5 +102,31 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
     public boolean hasApplied(Long agencyId) {
         Integer count = baseMapper.countByAgencyId(agencyId);
         return count != null && count > 0;
+    }
+
+    /**
+     * 根据ID查询申请表单详情
+     * @param id 申请表ID
+     * @return 申请表单数据（拼接文件完整路径）
+     */
+    @Override
+    public AgencyAuditApplication getApplicationById(Long id) {
+        // 1. 构建查询条件（排除软删除数据）
+        LambdaQueryWrapper<AgencyAuditApplication> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(AgencyAuditApplication::getId, id)
+                   .eq(AgencyAuditApplication::getIsDeleted, 0);
+        
+        // 2. 从数据库查询数据
+        AgencyAuditApplication application = applicationMapper.selectOne(queryWrapper);
+        if (application == null) {
+            return null; // 无数据返回null，由Controller层统一处理
+        }
+
+        // 3. 拼接文件完整访问路径（方便前端预览）
+        if (application.getSealFilePath() != null && !application.getSealFilePath().isEmpty()) {
+            application.setSealFilePath(uploadBasePath + application.getSealFilePath());
+        }
+
+        return application;
     }
 }
