@@ -45,6 +45,6 @@ server:
 
 upload:
   # 文件上传根路径（项目根目录下upload）
-  base-path: ${user.dir}/upload/
+  base-path: ${user.dir}/../upload/
   # 访问路径前缀
   base-url: http://localhost:8080/upload/

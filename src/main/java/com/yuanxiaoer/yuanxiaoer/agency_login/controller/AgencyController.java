@@ -4,6 +4,10 @@ import com.yuanxiaoer.yuanxiaoer.common.Result;
 import com.yuanxiaoer.yuanxiaoer.agency_login.dto.LoginDTO;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.service.AgencyService;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
@@ -49,7 +53,11 @@ public class AgencyController {
     @GetMapping("/index")
     public Result<?> index(HttpSession session) {
         Agency loginAgency = (Agency) session.getAttribute("loginAgency");
-        return Result.success("欢迎 " + loginAgency.getUsername() + " 进入代理商界面，该界面待开发...");
+         // 返回包含用户信息的对象
+        Map<String, Object> data = new HashMap<>();
+        data.put("welcome", "欢迎 " + loginAgency.getUsername() + " 进入代理商界面");
+        data.put("agency", loginAgency); // 返回用户信息
+        return Result.success(data);
     }
 
     /**

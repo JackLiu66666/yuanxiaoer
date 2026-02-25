@@ -17,7 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AgencyLoginInterceptor())
                 // 需要拦截的接口（代理商首页）
-                .addPathPatterns("/agency/index/**", "/agencyAuditApplication/**")
+                .addPathPatterns("/agency/index", "/agencyAuditApplication/**")
                 // 放行的接口（登录、注册）
                 .excludePathPatterns("/agency/login", "/agency/register");
     }
