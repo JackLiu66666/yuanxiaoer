@@ -5,6 +5,8 @@ import com.yuanxiaoer.yuanxiaoer.admin.entity.SysAdmin;
 import com.yuanxiaoer.yuanxiaoer.admin.service.SysAdminService;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +32,11 @@ public class SysAdminController {
      * @return 登录结果
      */
     @PostMapping("/login")
-    public Result<SysAdmin> login(@RequestBody LoginDTO loginDTO) {
-        return sysAdminService.login(loginDTO);
+    public Result<SysAdmin> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
+        Result<SysAdmin> result = sysAdminService.login(loginDTO);
+        if (result.getCode() == 200) {
+            session.setAttribute("loginAdmin", result.getData());
+        }
+        return result;
     }
 }

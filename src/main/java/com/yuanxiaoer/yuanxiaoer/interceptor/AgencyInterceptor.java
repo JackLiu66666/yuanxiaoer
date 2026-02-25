@@ -14,7 +14,7 @@ public class AgencyInterceptor implements HandlerInterceptor {
             // 未登录，返回JSON提示
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"code\":401,\"msg\":\"test请先登录\",\"data\":null}");
+            response.getWriter().write("{\"code\":401,\"msg\":\"Agency 请先登录\",\"data\":null}");
             return false;
         }
         // 已登录，放行
