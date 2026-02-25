@@ -1,10 +1,10 @@
 package com.yuanxiaoer.yuanxiaoer.config;
 
-import com.yuanxiaoer.yuanxiaoer.agency_login.interceptor.AgencyLoginInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.yuanxiaoer.yuanxiaoer.interceptor.AgencyInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AgencyLoginInterceptor())
+        registry.addInterceptor(new AgencyInterceptor())
                 // 需要拦截的接口（代理商首页）
                 .addPathPatterns("/agency/index", "/agencyAuditApplication/**")
                 // 放行的接口（登录、注册）

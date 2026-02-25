@@ -14,4 +14,8 @@ public interface AgencyMapper extends BaseMapper<Agency> {
      * 根据手机号/ID/用户名查询代理商
      */
     Agency selectByLoginKey(@Param("loginKey") String loginKey);
+    /**
+     * 修改审核状态
+     */
+    int updateAuditStatus(@Param("id") Long id, @Param("auditStatus") Integer auditStatus);
 }

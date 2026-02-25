@@ -8,4 +8,7 @@
         OR id = IF(#{loginKey} REGEXP '^[0-9]+$', #{loginKey}, NULL)
         OR username = #{loginKey}
     </select>
+    <update id="updateAuditStatus">
+        UPDATE agency SET audit_status = #{auditStatus} WHERE id = #{id}
+    </update>
 </mapper>

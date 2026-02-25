@@ -1,11 +1,11 @@
-package com.yuanxiaoer.yuanxiaoer.agency_login.interceptor;
+package com.yuanxiaoer.yuanxiaoer.interceptor;
 
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-public class AgencyLoginInterceptor implements HandlerInterceptor {
+public class AgencyInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 从Session获取登录用户

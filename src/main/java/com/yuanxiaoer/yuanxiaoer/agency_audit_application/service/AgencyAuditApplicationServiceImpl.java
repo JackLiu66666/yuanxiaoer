@@ -3,13 +3,16 @@ package com.yuanxiaoer.yuanxiaoer.agency_audit_application.service;
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
+import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper;
 //import com.yuanxiaoer.yuanxiaoer.agency_audit_application.service.AgencyAuditApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
@@ -26,7 +29,10 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
     @Value("${upload.base-path}")
     private String uploadBasePath;
 
+    @Autowired
+    private AgencyMapper agencyMapper;
     @Override
+    @Transactional(rollbackFor = Exception.class)  // 事务注解，任何异常都回滚
     public String submitApplication(AgencyAuditApplication application, MultipartFile sealFile, HttpSession session) {
         // 1. 从session获取当前代理商信息
         Agency loginAgency = (Agency) session.getAttribute("loginAgency");
@@ -74,7 +80,13 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
         // 5. 保存申请数据到数据库
         save(application);
 
-        // 6. 更新session（刷新申请状态）
+        // 6. 更新 agency 表的 audit_status 为 1（待审核）
+        int updated = agencyMapper.updateAuditStatus(agencyId, 1);
+        if (updated != 1) {
+            // 如果更新失败（比如 agency 记录被删除），抛出异常触发事务回滚
+            throw new RuntimeException("更新代理商审核状态失败");
+        }
+        // 7. 更新session（刷新申请状态）
         loginAgency.setAuditStatus(1); // 待审核
         session.setAttribute("loginAgency", loginAgency);
 
