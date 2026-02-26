@@ -49,6 +49,16 @@ public class SysAdminController {
         }
         return result;
     }
+    /**
+     * 登出接口
+     * @return 登出结果
+    */
+    @PostMapping("/logout")
+    public Result<?> logout(HttpSession session) {
+        session.removeAttribute("loginAdmin"); // 移除登录态
+        session.invalidate(); // 销毁Session
+        return Result.success("退出登录成功");
+    }
 
     /**
      * 分页查询代理商申请列表
