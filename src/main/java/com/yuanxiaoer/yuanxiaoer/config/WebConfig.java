@@ -5,6 +5,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.yuanxiaoer.yuanxiaoer.interceptor.AgencyInterceptor;
+import com.yuanxiaoer.yuanxiaoer.interceptor.InsuranceCompanyInterceptor;
 import com.yuanxiaoer.yuanxiaoer.interceptor.AdminInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -19,9 +20,14 @@ public class WebConfig implements WebMvcConfigurer {
         // 代理商拦截器
         registry.addInterceptor(new AgencyInterceptor())
                 // 需要拦截的接口（代理商首页）
-                .addPathPatterns("/agency/index", "/agencyAuditApplication/**")
+                .addPathPatterns("/agency/**", "/agencyAuditApplication/**")
                 // 放行的接口（登录、注册）
                 .excludePathPatterns("/agency/login", "/agency/register");
+        registry.addInterceptor(new InsuranceCompanyInterceptor())
+                // 需要拦截的接口
+                .addPathPatterns("/insurance_company/**")
+                // 放行的接口
+                .excludePathPatterns("/insurance_company/login", "/insurance_company/register");
         registry.addInterceptor(new AdminInterceptor())
                 // 需要拦截的接口
                 .addPathPatterns("/admin/**")
