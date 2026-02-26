@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
-//import com.yuanxiaoer.yuanxiaoer.agency_login.service.AgencyService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -60,17 +59,6 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
         if (!passwordEncoder.matches(password, agency.getPassword())) {
             return Result.error("密码错误");
         }
-
-        // // 3. 校验审核状态（仅通过审核的用户可登录）
-        // if (!agency.getAuditStatus().equals(2)) {
-        //     String auditMsg = switch (agency.getAuditStatus()) {
-        //         case 0 -> "账号未提交审核";
-        //         case 1 -> "账号待审核，请耐心等待";
-        //         case 3 -> "账号审核未通过";
-        //         default -> "账号状态异常";
-        //     };
-        //     return Result.error(auditMsg);
-        // }
 
         // 4. 登录成功：移除密码，返回用户信息（供存入Session）
         agency.setPassword(null); // 敏感信息置空
