@@ -1,8 +1,11 @@
 package com.yuanxiaoer.yuanxiaoer.admin.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuanxiaoer.yuanxiaoer.admin.dto.LoginDTO;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.SysAdmin;
 import com.yuanxiaoer.yuanxiaoer.admin.service.SysAdminService;
+import com.yuanxiaoer.yuanxiaoer.admin.vo.AgencyApplyVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.service.AgencyAuditApplicationService;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
@@ -13,8 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * 管理员控制器
@@ -48,12 +51,33 @@ public class SysAdminController {
     }
 
     /**
+     * 分页查询代理商申请列表
+     * @param current 当前页（默认1）
+     * @param size 每页条数（默认20）
+     */
+    @GetMapping("/agencyApplicationReview/list")
+    public Result<IPage<AgencyApplyVO>> getApplyList(
+            @RequestParam(defaultValue = "1") Long current,
+            @RequestParam(defaultValue = "20") Long size,
+            HttpSession session) {
+        // 1. 登录状态验证（Controller层处理请求相关的验证）
+        Object loginAdmin = session.getAttribute("loginAdmin");
+        if (loginAdmin == null) {
+            return Result.error("未登录，请先登录");
+        }
+        // 2. 调用Service层处理核心业务逻辑
+        Page<AgencyApplyVO> page = new Page<>(current, size);
+        IPage<AgencyApplyVO> applyList = sysAdminService.getApplyList(page);
+        return Result.success(applyList);
+    }
+
+    /**
      * 根据ID查询申请表单详情
      * @param id 申请表ID
      * @param session 会话（验证登录）
      * @return 表单数据
      */
-    @GetMapping("/agencyApplicationReview/{id}")
+    @GetMapping("/agencyApplicationReview/list/{id}")
     public Result<AgencyAuditApplication> getApplicationById(@PathVariable Long id, HttpSession session) {
         // 1. 登录状态验证（Controller层处理请求相关的验证）
         Object loginAdmin = session.getAttribute("loginAdmin");
