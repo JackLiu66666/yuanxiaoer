@@ -7,6 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.yuanxiaoer.yuanxiaoer.interceptor.AgencyInterceptor;
 import com.yuanxiaoer.yuanxiaoer.interceptor.InsuranceCompanyInterceptor;
 import com.yuanxiaoer.yuanxiaoer.interceptor.AdminInterceptor;
+import com.yuanxiaoer.yuanxiaoer.interceptor.NurseInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -33,6 +34,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/admin/**")
                 // 放行的接口
                 .excludePathPatterns("/admin/login");
+        // 护士拦截器
+        registry.addInterceptor(new NurseInterceptor())
+                // 需要拦截的接口
+                .addPathPatterns("/nurse/**")
+                // 放行的接口（登录、注册、检查审核状态）
+                .excludePathPatterns("/nurse/login", "/nurse/register");
     }
 
     @Value("${upload.base-path}")

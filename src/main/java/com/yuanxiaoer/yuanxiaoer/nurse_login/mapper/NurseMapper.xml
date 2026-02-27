@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuanxiaoer.yuanxiaoer.nurse_login.mapper.NurseMapper">
+    <!-- 根据手机号/ID/用户名查询护士 -->
+    <select id="selectByLoginKey" resultType="com.yuanxiaoer.yuanxiaoer.nurse_login.entity.Nurse">
+        SELECT * FROM nurse
+        WHERE phone = #{loginKey} 
+        OR id = IF(#{loginKey} REGEXP '^[0-9]+$', #{loginKey}, NULL)
+        OR username = #{loginKey}
+    </select>
+    <update id="updateAuditStatus">
+        UPDATE nurse SET audit_status = #{auditStatus} WHERE id = #{id}
+    </update>
+    <update id="updateOnlineStatus">
+        UPDATE nurse SET online_status = #{onlineStatus} WHERE id = #{id}
+    </update>
+</mapper>
