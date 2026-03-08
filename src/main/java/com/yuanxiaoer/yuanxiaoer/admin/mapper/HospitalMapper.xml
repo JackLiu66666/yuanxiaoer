@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalMapper">
+
+    <!-- 查询所有有 agency 的省份 -->
+    <select id="getProvincesWithAgency" resultType="java.lang.String">
+        SELECT DISTINCT h.province 
+        FROM hospital h 
+        INNER JOIN hospital_agency_relation r ON h.id = r.hospital_id 
+        WHERE h.province IS NOT NULL AND h.province != ''
+    </select>
+
+    <!-- 查询指定省份下有 agency 的城市 -->
+    <select id="getCitiesByProvince" resultType="java.lang.String">
+        SELECT DISTINCT h.city 
+        FROM hospital h 
+        INNER JOIN hospital_agency_relation r ON h.id = r.hospital_id 
+        WHERE h.province = #{province} AND h.city IS NOT NULL AND h.city != ''
+    </select>
+
+    <!-- 查询指定城市下有 agency 的医院 -->
+    <select id="getHospitalsByCity" resultType="com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital">
+        SELECT DISTINCT h.* 
+        FROM hospital h 
+        INNER JOIN hospital_agency_relation r ON h.id = r.hospital_id 
+        WHERE h.city = #{city}
+    </select>
+</mapper>
