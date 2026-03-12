@@ -1,6 +1,7 @@
 package com.yuanxiaoer.yuanxiaoer.agency_audit_application.service;
 
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaItem;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
@@ -41,4 +42,18 @@ public interface AgencyAuditApplicationService {
      * @return 医院列表
      */
     List<HospitalSelectVO> getHospitalsByCity(String city);
+    
+    /**
+     * 验证业务范围代码是否有效
+     * @param codes 业务代码列表
+     * @return 验证结果
+     */
+    boolean validateBusinessScope(List<Integer> codes);
+    
+    /**
+     * 验证合作区域数据是否有效
+     * @param items 合作区域列表
+     * @return 验证结果
+     */
+    boolean validateCooperationArea(List<CooperationAreaItem> items);
 }

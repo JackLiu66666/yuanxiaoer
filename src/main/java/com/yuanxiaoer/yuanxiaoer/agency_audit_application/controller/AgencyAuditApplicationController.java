@@ -2,6 +2,9 @@ package com.yuanxiaoer.yuanxiaoer.agency_audit_application.controller;
 
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.service.AgencyAuditApplicationService;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.BusinessScopeUtil;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaItem;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaUtil;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
@@ -166,6 +169,66 @@ public class AgencyAuditApplicationController {
         } catch (Exception e) {
             result.put("code", 500);
             result.put("msg", "获取医院失败：" + e.getMessage());
+            return ResponseEntity.internalServerError().body(result);
+        }
+    }
+    
+    /**
+     * 验证业务范围数据
+     * @param codes 业务代码列表，如 [1,2,3]
+     * @return 验证结果
+     */
+    @PostMapping("/validate-business-scope")
+    public ResponseEntity<Map<String, Object>> validateBusinessScope(@RequestBody List<Integer> codes) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            boolean isValid = agencyAuditApplicationService.validateBusinessScope(codes);
+            result.put("code", 200);
+            result.put("data", isValid);
+            
+            if (isValid) {
+                // 返回业务名称列表
+                List<String> names = BusinessScopeUtil.getNames(codes);
+                result.put("names", names);
+            }
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("msg", "验证失败：" + e.getMessage());
+            return ResponseEntity.internalServerError().body(result);
+        }
+    }
+    
+    /**
+     * 验证合作区域数据
+     * @param items 合作区域列表
+     * @return 验证结果
+     */
+    @PostMapping("/validate-cooperation-area")
+    public ResponseEntity<Map<String, Object>> validateCooperationArea(@RequestBody List<CooperationAreaItem> items) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            boolean isValid = agencyAuditApplicationService.validateCooperationArea(items);
+            result.put("code", 200);
+            result.put("data", isValid);
+            
+            if (isValid) {
+                // 返回格式化后的显示文本
+                List<String> displayTexts = items.stream()
+                    .map(CooperationAreaItem::getDisplayText)
+                    .collect(java.util.stream.Collectors.toList());
+                result.put("displayTexts", displayTexts);
+                
+                // 返回总医院数量
+                int totalHospitals = CooperationAreaUtil.getTotalHospitalCount(items);
+                result.put("totalHospitals", totalHospitals);
+            }
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("msg", "验证失败：" + e.getMessage());
             return ResponseEntity.internalServerError().body(result);
         }
     }

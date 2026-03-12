@@ -11,10 +11,10 @@ public class AgencyAuditApplication {
     @TableId(type = IdType.AUTO)
     private Long id;
     
-    // 申请唯一ID（自定义生成）
+    // 申请唯一 ID（自定义生成）
     private String applyId;
     
-    // 关联代理商ID
+    // 关联代理商 ID
     private Long agencyId;
     
     // 机构全称
@@ -32,10 +32,10 @@ public class AgencyAuditApplication {
     // 经营许可证/备案号
     private String businessLicenseNo;
     
-    // 许可证有效期-开始
+    // 许可证有效期 - 开始
     private LocalDate licenseValidStart;
     
-    // 许可证有效期-结束
+    // 许可证有效期 - 结束
     private LocalDate licenseValidEnd;
     
     // 法定代表人姓名
@@ -65,10 +65,12 @@ public class AgencyAuditApplication {
     // 公司固定电话
     private String companyFixedPhone;
     
-    // 合作业务范围
+    // 合作业务范围（JSON 数组，存储 1-6 的数字，分别代表：1-院陪诊，2-院陪护，3-院办办，4-院保保，5-院垫垫，6-院探探）
     private String businessScope;
     
-    // 合作区域
+    // 合作区域（JSON 数组，每个对象包含 province、city、hospitalIds 字段，
+    // 例如：[{"province":"广东省","city":"广州市","hospitalIds":[10,11,12]},{"province":"广东省","city":"深圳市","hospitalIds":[]}]，
+    // hospitalIds 为空数组或 null 表示全市）
     private String cooperationArea;
     
     // 合作模式

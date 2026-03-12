@@ -8,6 +8,9 @@ import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.BusinessScopeUtil;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaItem;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaUtil;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
@@ -161,5 +164,75 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
     public List<HospitalSelectVO> getHospitalsByCity(String city) {
         List<HospitalSelectVO> hospitals = hospitalMapper.getAllHospitalsByCity(city);
         return hospitals;
+    }
+
+    @Override
+    public boolean validateBusinessScope(List<Integer> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return false;
+        }
+        
+        // 验证每个代码是否在 1-6 范围内
+        for (Integer code : codes) {
+            if (code < 1 || code > 6) {
+                log.warn("无效的业务范围代码：{}", code);
+                return false;
+            }
+        }
+        
+        // 检查是否有重复
+        if (codes.size() != codes.stream().distinct().count()) {
+            log.warn("业务范围代码有重复");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 验证合作区域数据是否有效
+     * @param items 合作区域列表
+     * @return 验证结果
+     */
+    @Override
+    public boolean validateCooperationArea(List<CooperationAreaItem> items) {
+        if (items == null || items.isEmpty()) {
+            return false;
+        }
+        
+        for (CooperationAreaItem item : items) {
+            // 验证省份和城市不能为空
+            if (item.getProvince() == null || item.getProvince().trim().isEmpty()) {
+                log.warn("合作区域缺少省份信息");
+                return false;
+            }
+            if (item.getCity() == null || item.getCity().trim().isEmpty()) {
+                log.warn("合作区域缺少城市信息");
+                return false;
+            }
+            
+            // 如果指定了医院 IDs，需要验证
+            if (item.getHospitalIds() != null && !item.getHospitalIds().isEmpty()) {
+                // 验证每个医院 ID 是否为正数
+                for (Long hospitalId : item.getHospitalIds()) {
+                    if (hospitalId == null || hospitalId <= 0) {
+                        log.warn("无效的医院 ID: {}", hospitalId);
+                        return false;
+                    }
+                }
+                
+                // 检查是否有重复的医院 ID
+                if (item.getHospitalIds().size() != item.getHospitalIds().stream().distinct().count()) {
+                    log.warn("城市 {} 中有重复的医院 ID", item.getCity());
+                    return false;
+                }
+                
+                // TODO: 可以在这里添加医院存在性验证
+                log.info("验证城市 {} 的医院 IDs: {}", item.getCity(), item.getHospitalIds());
+            }
+            // 如果 hospitalIds 为空或 null，表示全市，不需要验证医院 ID
+        }
+        
+        return true;
     }
 }
