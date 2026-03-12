@@ -25,4 +25,30 @@
         INNER JOIN hospital_agency_relation r ON h.id = r.hospital_id 
         WHERE h.city = #{city}
     </select>
+    
+    <!-- 获取所有有医院的省份（全新方法，不关联 agency） -->
+    <select id="getAllProvinces" resultType="java.lang.String">
+        SELECT DISTINCT province 
+        FROM hospital 
+        WHERE province IS NOT NULL AND province != ''
+        ORDER BY province
+    </select>
+    
+    <!-- 根据省份获取所有城市（全新方法，不关联 agency） -->
+    <select id="getAllCitiesByProvince" resultType="java.lang.String">
+        SELECT DISTINCT city 
+        FROM hospital 
+        WHERE province = #{province} 
+          AND city IS NOT NULL 
+          AND city != ''
+        ORDER BY city
+    </select>
+    
+    <!-- 根据城市获取所有医院（全新方法，不关联 agency，返回 VO） -->
+    <select id="getAllHospitalsByCity" resultType="com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO">
+        SELECT id, hospital_name AS hospitalName
+        FROM hospital 
+        WHERE city = #{city}
+        ORDER BY hospital_name
+    </select>
 </mapper>

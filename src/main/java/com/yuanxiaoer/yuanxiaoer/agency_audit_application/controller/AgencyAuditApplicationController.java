@@ -2,6 +2,9 @@ package com.yuanxiaoer.yuanxiaoer.agency_audit_application.controller;
 
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.service.AgencyAuditApplicationService;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,6 +22,9 @@ public class AgencyAuditApplicationController {
 
     @Autowired
     private AgencyAuditApplicationService applicationService;
+    
+    @Autowired
+    private AgencyAuditApplicationService agencyAuditApplicationService;
 
     /**
      * 提交代理商审核申请
@@ -89,6 +96,77 @@ public class AgencyAuditApplicationController {
             result.put("code", 500);
             result.put("msg", "获取审核状态失败：" + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
+    /**
+     * 获取所有省份列表
+     * @return 省份列表
+     */
+    @GetMapping("/provinces")
+    public ResponseEntity<Map<String, Object>> getProvinces() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            List<ProvinceVO> provinces = agencyAuditApplicationService.getProvinces();
+            result.put("code", 200);
+            result.put("data", provinces);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("msg", "获取省份失败：" + e.getMessage());
+            return ResponseEntity.internalServerError().body(result);
+        }
+    }
+    
+    /**
+     * 根据省份获取城市列表
+     * @param province 省份名称
+     * @return 城市列表
+     */
+    @GetMapping("/cities")
+    public ResponseEntity<Map<String, Object>> getCitiesByProvince(@RequestParam("province") String province) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            if (province == null || province.trim().isEmpty()) {
+                result.put("code", 400);
+                result.put("msg", "省份参数不能为空");
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+            List<CityVO> cities = agencyAuditApplicationService.getCitiesByProvince(province);
+            result.put("code", 200);
+            result.put("data", cities);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("msg", "获取城市失败：" + e.getMessage());
+            return ResponseEntity.internalServerError().body(result);
+        }
+    }
+    
+    /**
+     * 根据城市获取医院列表
+     * @param city 城市名称
+     * @return 医院列表（包含 id 和名称）
+     */
+    @GetMapping("/hospitals")
+    public ResponseEntity<Map<String, Object>> getHospitalsByCity(@RequestParam("city") String city) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            if (city == null || city.trim().isEmpty()) {
+                result.put("code", 400);
+                result.put("msg", "城市参数不能为空");
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+            List<HospitalSelectVO> hospitals = agencyAuditApplicationService.getHospitalsByCity(city);
+            result.put("code", 200);
+            result.put("data", hospitals);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("code", 500);
+            result.put("msg", "获取医院失败：" + e.getMessage());
+            return ResponseEntity.internalServerError().body(result);
         }
     }
 }

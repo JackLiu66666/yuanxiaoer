@@ -3,10 +3,14 @@ package com.yuanxiaoer.yuanxiaoer.agency_audit_application.service;
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalMapper;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,6 +36,8 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
     private AgencyMapper agencyMapper;
     @Autowired
     private AgencyAuditApplicationMapper applicationMapper;
+    @Autowired
+    private HospitalMapper hospitalMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)  // 事务注解，任何异常都回滚
@@ -123,5 +131,35 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
         }
 
         return application;
+    }
+
+    @Override
+    public List<ProvinceVO> getProvinces() {
+        List<String> provinces = hospitalMapper.getAllProvinces();
+        return provinces.stream()
+                .map(province -> {
+                    ProvinceVO vo = new ProvinceVO();
+                    vo.setProvince(province);
+                    return vo;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<CityVO> getCitiesByProvince(String province) {
+        List<String> cities = hospitalMapper.getAllCitiesByProvince(province);
+        return cities.stream()
+                .map(city -> {
+                    CityVO vo = new CityVO();
+                    vo.setCity(city);
+                    return vo;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<HospitalSelectVO> getHospitalsByCity(String city) {
+        List<HospitalSelectVO> hospitals = hospitalMapper.getAllHospitalsByCity(city);
+        return hospitals;
     }
 }
