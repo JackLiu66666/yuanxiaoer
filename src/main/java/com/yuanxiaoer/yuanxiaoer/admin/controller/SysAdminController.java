@@ -82,20 +82,20 @@ public class SysAdminController {
     }
 
     /**
-     * 根据ID查询申请表单详情
-     * @param id 申请表ID
+     * 根据 ID 查询申请表单详情
+     * @param id 申请表 ID
      * @param session 会话（验证登录）
      * @return 表单数据
      */
     @GetMapping("/agencyApplicationReview/list/{id}")
     public Result<AgencyAuditApplication> getApplicationById(@PathVariable Long id, HttpSession session) {
-        // 1. 登录状态验证（Controller层处理请求相关的验证）
+        // 1. 登录状态验证（Controller 层处理请求相关的验证）
         Object loginAdmin = session.getAttribute("loginAdmin");
         if (loginAdmin == null) {
             return Result.error("未登录，请先登录");
         }
 
-        // 2. 调用Service层处理核心业务逻辑
+        // 2. 调用 Service 层处理核心业务逻辑
         AgencyAuditApplication application = applicationService.getApplicationById(id);
 
         // 3. 统一返回响应结果
@@ -103,5 +103,41 @@ public class SysAdminController {
             return Result.error("申请表单不存在");
         }
         return Result.success(application);
+    }
+
+    /**
+     * 审核通过
+     * @param id 申请 ID
+     * @param session 会话（验证登录）
+     * @return 审核结果
+     */
+    @PostMapping("/agencyApplicationReview/approve/{id}")
+    public Result<String> approveApplication(@PathVariable Long id, HttpSession session) {
+        // 1. 登录状态验证
+        Object loginAdmin = session.getAttribute("loginAdmin");
+        if (loginAdmin == null) {
+            return Result.error("未登录，请先登录");
+        }
+
+        // 2. 调用 Service 层处理审核逻辑
+        return sysAdminService.approveApplication(id);
+    }
+
+    /**
+     * 审核不通过
+     * @param id 申请 ID
+     * @param session 会话（验证登录）
+     * @return 审核结果
+     */
+    @PostMapping("/agencyApplicationReview/reject/{id}")
+    public Result<String> rejectApplication(@PathVariable Long id, HttpSession session) {
+        // 1. 登录状态验证
+        Object loginAdmin = session.getAttribute("loginAdmin");
+        if (loginAdmin == null) {
+            return Result.error("未登录，请先登录");
+        }
+
+        // 2. 调用 Service 层处理审核逻辑
+        return sysAdminService.rejectApplication(id);
     }
 }

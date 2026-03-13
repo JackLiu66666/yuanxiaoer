@@ -26,4 +26,18 @@ public interface SysAdminService extends IService<SysAdmin> {
      */
     IPage<AgencyApplyVO> getApplyList(Page<AgencyApplyVO> page);
 
+    /**
+     * 审核通过
+     * @param id 申请 ID
+     * @return 审核结果
+     */
+    Result<String> approveApplication(Long id);
+
+    /**
+     * 审核不通过
+     * @param id 申请 ID
+     * @return 审核结果
+     */
+    Result<String> rejectApplication(Long id);
+
 }

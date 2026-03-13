@@ -1,18 +1,31 @@
 package com.yuanxiaoer.yuanxiaoer.admin.service;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.admin.dto.LoginDTO;
+import com.yuanxiaoer.yuanxiaoer.admin.entity.AgencyBusinessScopeRelation;
+import com.yuanxiaoer.yuanxiaoer.admin.entity.HospitalAgencyRelation;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.SysAdmin;
 import com.yuanxiaoer.yuanxiaoer.admin.mapper.SysAdminMapper;
+import com.yuanxiaoer.yuanxiaoer.admin.mapper.AgencyBusinessScopeRelationMapper;
+import com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalAgencyRelationMapper;
+import com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalMapper;
 import com.yuanxiaoer.yuanxiaoer.admin.vo.AgencyApplyVO;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper;
+import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import java.util.List;
+import java.util.Map;
+
 /**
  * 管理员服务实现类
  */
@@ -60,9 +73,210 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
      */
     @Autowired
     private AgencyAuditApplicationMapper agencyAuditApplicationMapper;
+    
+    @Autowired
+    private AgencyMapper agencyMapper;
+    
+    @Autowired
+    private HospitalAgencyRelationMapper hospitalAgencyRelationMapper;
+    
+    @Autowired
+    private AgencyBusinessScopeRelationMapper agencyBusinessScopeRelationMapper;
+    
+    @Autowired
+    private HospitalMapper hospitalMapper;
 
     @Override
     public IPage<AgencyApplyVO> getApplyList(Page<AgencyApplyVO> page) {
         return agencyAuditApplicationMapper.selectApplyPage(page);
+    }
+
+    /**
+     * 审核通过
+     * @param id 申请 ID
+     * @return 审核结果
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<String> approveApplication(Long id) {
+        try {
+            // 1. 查询申请信息
+            LambdaQueryWrapper<AgencyAuditApplication> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(AgencyAuditApplication::getId, id)
+                       .eq(AgencyAuditApplication::getIsDeleted, 0);
+            AgencyAuditApplication application = agencyAuditApplicationMapper.selectOne(queryWrapper);
+            
+            if (application == null) {
+                return Result.error("申请不存在");
+            }
+            
+            Long agencyId = application.getAgencyId();
+            
+            // 2. 将申请标记为已删除（软删除）
+            application.setIsDeleted(1);
+            agencyAuditApplicationMapper.updateById(application);
+            
+            // 3. 更新代理商审核状态为通过（2）
+            agencyMapper.updateAuditStatus(agencyId, 2);
+            
+            // 4. 处理合作区域，添加医院与代理商关系
+            if (application.getCooperationArea() != null && !application.getCooperationArea().isEmpty()) {
+                try {
+                    // 解析合作区域 JSON
+                    List<Map<String, Object>> areas = JSON.parseObject(
+                        application.getCooperationArea(),
+                        new com.alibaba.fastjson.TypeReference<List<Map<String, Object>>>() {}
+                    );
+                    
+                    // 遍历每个区域，添加医院与代理商关系
+                    for (Map<String, Object> area : areas) {
+                        String province = (String) area.get("province");
+                        String city = (String) area.get("city");
+                        Object hospitalIdsObj = area.get("hospitalIds");
+                        
+                        List<Long> hospitalIds = new java.util.ArrayList<>();
+                        
+                        // 判断是否为空数组，如果是空数组则查询该城市的所有医院
+                        if (hospitalIdsObj instanceof List) {
+                            // 使用流式处理进行安全的类型转换
+                            hospitalIds = ((List<?>) hospitalIdsObj)
+                                .stream()
+                                .map(hospitalIdObj -> {
+                                    if (hospitalIdObj instanceof Number) {
+                                        return ((Number) hospitalIdObj).longValue();
+                                    } else if (hospitalIdObj instanceof String) {
+                                        try {
+                                            return Long.parseLong((String) hospitalIdObj);
+                                        } catch (NumberFormatException e) {
+                                            throw new IllegalArgumentException("Invalid hospitalId format: " + hospitalIdObj);
+                                        }
+                                    } else {
+                                        throw new IllegalArgumentException("Invalid hospitalId type: " + (hospitalIdObj != null ? hospitalIdObj.getClass().getName() : "null"));
+                                    }
+                                })
+                                .collect(java.util.stream.Collectors.toList());
+                            
+                            // 如果 hospitalIds 为空数组，查询该城市的所有医院
+                            if (hospitalIds.isEmpty() && city != null && !city.isEmpty()) {
+                                // 查询该城市的所有医院
+                                LambdaQueryWrapper<com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital> hospitalQuery = new LambdaQueryWrapper<>();
+                                hospitalQuery.eq(com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital::getCity, city);
+                                if (province != null && !province.isEmpty()) {
+                                    hospitalQuery.eq(com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital::getProvince, province);
+                                }
+                                List<com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital> allHospitals = hospitalMapper.selectList(hospitalQuery);
+                                
+                                // 将查询到的医院 ID 添加到列表中
+                                hospitalIds = allHospitals.stream()
+                                    .map(com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital::getId)
+                                    .collect(java.util.stream.Collectors.toList());
+                            }
+                        }
+                        
+                        // 添加医院与代理商关系
+                        for (Long hospitalId : hospitalIds) {
+                            // 检查是否已存在，避免重复添加
+                            LambdaQueryWrapper<HospitalAgencyRelation> relationQuery = new LambdaQueryWrapper<>();
+                            relationQuery.eq(HospitalAgencyRelation::getHospitalId, hospitalId)
+                                        .eq(HospitalAgencyRelation::getAgencyId, agencyId);
+                            long count = hospitalAgencyRelationMapper.selectCount(relationQuery);
+                            
+                            if (count == 0) {
+                                // 添加新的关系
+                                HospitalAgencyRelation relation = new HospitalAgencyRelation();
+                                relation.setHospitalId(hospitalId);
+                                relation.setAgencyId(agencyId);
+                                hospitalAgencyRelationMapper.insert(relation);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // 记录错误但不影响主流程
+                    System.err.println("处理合作区域失败：" + e.getMessage());
+                }
+            }
+            
+            // 5. 处理业务范围，添加代理商与业务范围关系
+            if (application.getBusinessScope() != null && !application.getBusinessScope().isEmpty()) {
+                try {
+                    // 使用流式处理进行安全的类型转换
+                    List<?> businessScopesRaw = JSON.parseArray(application.getBusinessScope());
+                    List<Integer> businessScopes = businessScopesRaw.stream()
+                        .map(obj -> {
+                            if (obj instanceof Number) {
+                                return ((Number) obj).intValue();
+                            } else if (obj instanceof String) {
+                                try {
+                                    return Integer.parseInt((String) obj);
+                                } catch (NumberFormatException e) {
+                                    throw new IllegalArgumentException("Invalid businessScope format: " + obj);
+                                }
+                            } else {
+                                throw new IllegalArgumentException("Invalid businessScope type: " + (obj != null ? obj.getClass().getName() : "null"));
+                            }
+                        })
+                        .collect(java.util.stream.Collectors.toList());
+                    
+                    for (Integer businessScope : businessScopes) {
+                        // 检查是否已存在，避免重复添加
+                        LambdaQueryWrapper<AgencyBusinessScopeRelation> relationQuery = new LambdaQueryWrapper<>();
+                        relationQuery.eq(AgencyBusinessScopeRelation::getAgencyId, agencyId)
+                                    .eq(AgencyBusinessScopeRelation::getBusinessScope, businessScope);
+                        long count = agencyBusinessScopeRelationMapper.selectCount(relationQuery);
+                        
+                        if (count == 0) {
+                            // 添加新的关系
+                            AgencyBusinessScopeRelation relation = new AgencyBusinessScopeRelation();
+                            relation.setAgencyId(agencyId);
+                            relation.setBusinessScope(businessScope);
+                            agencyBusinessScopeRelationMapper.insert(relation);
+                        }
+                    }
+                } catch (Exception e) {
+                    // 记录错误但不影响主流程
+                    System.err.println("处理业务范围失败：" + e.getMessage());
+                }
+            }
+            
+            return Result.success("审核通过");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("审核失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 审核不通过
+     * @param id 申请 ID
+     * @return 审核结果
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<String> rejectApplication(Long id) {
+        try {
+            // 1. 查询申请信息
+            LambdaQueryWrapper<AgencyAuditApplication> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(AgencyAuditApplication::getId, id)
+                       .eq(AgencyAuditApplication::getIsDeleted, 0);
+            AgencyAuditApplication application = agencyAuditApplicationMapper.selectOne(queryWrapper);
+            
+            if (application == null) {
+                return Result.error("申请不存在");
+            }
+            
+            Long agencyId = application.getAgencyId();
+            
+            // 2. 将申请标记为已删除（软删除）
+            application.setIsDeleted(1);
+            agencyAuditApplicationMapper.updateById(application);
+            
+            // 3. 更新代理商审核状态为不通过（3）
+            agencyMapper.updateAuditStatus(agencyId, 3);
+            
+            return Result.success("审核不通过");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("审核失败：" + e.getMessage());
+        }
     }
 }

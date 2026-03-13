@@ -195,7 +195,20 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
                 for (Map<String, Object> area : areas) {
                     Object hospitalIdsObj = area.get("hospitalIds");
                     if (hospitalIdsObj instanceof List) {
-                        List<Long> hospitalIds = (List<Long>) hospitalIdsObj;
+                        // 安全转换：先转为 List<?>，再逐个转换为 Long
+                        List<?> rawList = (List<?>) hospitalIdsObj;
+                        List<Long> hospitalIds = rawList.stream()
+                            .map(obj -> {
+                                if (obj instanceof Number) {
+                                    return ((Number) obj).longValue();
+                                } else if (obj instanceof String) {
+                                    return Long.parseLong((String) obj);
+                                } else {
+                                    throw new IllegalArgumentException("Invalid hospitalId type: " + obj);
+                                }
+                            })
+                            .collect(Collectors.toList());
+                        
                         if (!hospitalIds.isEmpty()) {
                             // 根据医院 ID 列表查询医院详细信息
                             List<com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalInfoVO> hospitals = 
