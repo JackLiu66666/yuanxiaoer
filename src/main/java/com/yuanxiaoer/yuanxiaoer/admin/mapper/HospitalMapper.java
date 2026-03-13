@@ -3,6 +3,7 @@ package com.yuanxiaoer.yuanxiaoer.admin.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
+import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalInfoVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -53,4 +54,11 @@ public interface HospitalMapper extends BaseMapper<Hospital> {
      * @return 医院列表（包含 id 和名称）
      */
     List<HospitalSelectVO> getAllHospitalsByCity(@Param("city") String city);
+    
+    /**
+     * 根据医院 ID 列表查询医院信息
+     * @param hospitalIds 医院 ID 列表
+     * @return 医院信息列表
+     */
+    List<HospitalInfoVO> getHospitalsByIds(@Param("hospitalIds") List<Long> hospitalIds);
 }

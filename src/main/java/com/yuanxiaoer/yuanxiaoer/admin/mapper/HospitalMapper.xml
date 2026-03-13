@@ -51,4 +51,21 @@
         WHERE city = #{city}
         ORDER BY hospital_name
     </select>
+    
+    <!-- 根据医院 ID 列表查询医院信息 -->
+    <select id="getHospitalsByIds" resultType="com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalInfoVO">
+        SELECT 
+            id,
+            province,
+            city,
+            district_county AS districtCounty,
+            hospital_name AS hospitalName,
+            hospital_level AS hospitalLevel
+        FROM hospital
+        WHERE id IN
+        <foreach collection="hospitalIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY id
+    </select>
 </mapper>

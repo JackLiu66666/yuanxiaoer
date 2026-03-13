@@ -1,6 +1,7 @@
 package com.yuanxiaoer.yuanxiaoer.agency_audit_application.service;
 
 import cn.hutool.core.lang.UUID;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalMapper;
@@ -8,9 +9,7 @@ import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper;
-import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.BusinessScopeUtil;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaItem;
-import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaUtil;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
@@ -24,7 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -65,13 +66,13 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
         // 4. 处理文件上传
         try {
             // 4.1 创建申请专属文件夹
-            String applyDir = uploadBasePath + applyId + "/";
+            String applyDir = uploadBasePath + "AgencyApply/" + applyId + "/";
             File dirFile = new File(applyDir);
             if (!dirFile.exists()) {
                 FileUtils.forceMkdir(dirFile);
             }
 
-            // 4.2 重命名文件（时间戳+原扩展名）
+            // 4.2 重命名文件（时间戳 + 原扩展名）
             String originalFilename = sealFile.getOriginalFilename();
             String ext = originalFilename.substring(originalFilename.lastIndexOf("."));
             String newFileName = "seal_" + System.currentTimeMillis() + ext;
@@ -82,7 +83,7 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
             sealFile.transferTo(sealFileDest);
 
             // 4.4 保存文件路径到实体
-            application.setSealFilePath(applyId + "/" + newFileName);
+            application.setSealFilePath("AgencyApply/" + applyId + "/" + newFileName);
         } catch (IOException e) {
             log.error("文件上传失败", e);
             return "文件上传失败：" + e.getMessage();
@@ -111,9 +112,9 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
     }
 
     /**
-     * 根据ID查询申请表单详情
-     * @param id 申请表ID
-     * @return 申请表单数据（拼接文件完整路径）
+     * 根据 ID 查询申请表单详情
+     * @param id 申请表 ID
+     * @return 申请表单数据（包含 Base64 编码的文件内容、业务名称列表、医院信息列表）
      */
     @Override
     public AgencyAuditApplication getApplicationById(Long id) {
@@ -125,12 +126,97 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
         // 2. 从数据库查询数据
         AgencyAuditApplication application = applicationMapper.selectOne(queryWrapper);
         if (application == null) {
-            return null; // 无数据返回null，由Controller层统一处理
+            return null; // 无数据返回 null，由 Controller 层统一处理
         }
 
-        // 3. 拼接文件完整访问路径（方便前端预览）
+        // 3. 读取文件并转换为 Base64 编码
         if (application.getSealFilePath() != null && !application.getSealFilePath().isEmpty()) {
-            application.setSealFilePath(uploadBasePath + application.getSealFilePath());
+            try {
+                String fullPath = uploadBasePath + application.getSealFilePath();
+                File file = new File(fullPath);
+                if (file.exists()) {
+                    // 读取文件字节
+                    byte[] fileBytes = FileUtils.readFileToByteArray(file);
+                    // 转换为 Base64 编码
+                    String base64Data = java.util.Base64.getEncoder().encodeToString(fileBytes);
+                    // 获取文件扩展名
+                    String ext = "";
+                    int dotIndex = application.getSealFilePath().lastIndexOf(".");
+                    if (dotIndex > 0) {
+                        ext = application.getSealFilePath().substring(dotIndex + 1).toLowerCase();
+                    }
+                    // 设置 MIME 类型
+                    String mimeType = "image/jpeg"; // 默认
+                    if ("png".equals(ext)) {
+                        mimeType = "image/png";
+                    } else if ("gif".equals(ext)) {
+                        mimeType = "image/gif";
+                    } else if ("bmp".equals(ext)) {
+                        mimeType = "image/bmp";
+                    } else if ("webp".equals(ext)) {
+                        mimeType = "image/webp";
+                    }
+                    // 封装为 Data URL 格式：data:image/jpeg;base64,/9j/4AAQSk...
+                    application.setSealFilePath("data:" + mimeType + ";base64," + base64Data);
+                }
+            } catch (IOException e) {
+                log.error("读取文件失败：" + application.getSealFilePath(), e);
+                // 文件读取失败时，保留原路径或设置为错误提示
+                application.setSealFilePath("文件读取失败");
+            }
+        }
+
+        // 4. 处理 businessScope：将代码列表转换为业务名称列表
+        if (application.getBusinessScope() != null && !application.getBusinessScope().isEmpty()) {
+            try {
+                List<Integer> codes = JSON.parseArray(application.getBusinessScope(), Integer.class);
+                List<String> businessNames = new ArrayList<>();
+                for (Integer code : codes) {
+                    businessNames.add(com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.BusinessScopeEnum.getName(code));
+                }
+                // 将业务名称列表转为 JSON 字符串存储回字段
+                application.setBusinessScope(JSON.toJSONString(businessNames));
+            } catch (Exception e) {
+                log.error("解析业务范围失败", e);
+                application.setBusinessScope("[]");
+            }
+        }
+
+        // 5. 处理 cooperationArea：将医院 ID 列表转换为医院详细信息列表
+        if (application.getCooperationArea() != null && !application.getCooperationArea().isEmpty()) {
+            try {
+                // 解析合作区域 JSON
+                List<Map<String, Object>> areas = JSON.parseObject(
+                    application.getCooperationArea(), 
+                    new com.alibaba.fastjson.TypeReference<List<Map<String, Object>>>() {}
+                );
+                
+                // 遍历每个区域，替换 hospitalIds 为医院详细信息
+                for (Map<String, Object> area : areas) {
+                    Object hospitalIdsObj = area.get("hospitalIds");
+                    if (hospitalIdsObj instanceof List) {
+                        List<Long> hospitalIds = (List<Long>) hospitalIdsObj;
+                        if (!hospitalIds.isEmpty()) {
+                            // 根据医院 ID 列表查询医院详细信息
+                            List<com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalInfoVO> hospitals = 
+                                hospitalMapper.getHospitalsByIds(hospitalIds);
+                            // 替换 hospitalIds 为医院详细信息列表
+                            area.put("hospitals", hospitals);
+                            area.remove("hospitalIds");
+                        } else {
+                            // 空数组表示全市，保留空数组或设为 null
+                            area.put("hospitals", new ArrayList<>());
+                            area.remove("hospitalIds");
+                        }
+                    }
+                }
+                
+                // 将处理后的合作区域转回 JSON 字符串
+                application.setCooperationArea(JSON.toJSONString(areas));
+            } catch (Exception e) {
+                log.error("解析合作区域失败", e);
+                application.setCooperationArea("[]");
+            }
         }
 
         return application;
