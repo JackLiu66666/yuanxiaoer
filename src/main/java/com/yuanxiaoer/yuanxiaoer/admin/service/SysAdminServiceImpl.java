@@ -2,6 +2,7 @@ package com.yuanxiaoer.yuanxiaoer.admin.service;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.admin.dto.LoginDTO;
@@ -102,8 +103,7 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
         try {
             // 1. 查询申请信息
             LambdaQueryWrapper<AgencyAuditApplication> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AgencyAuditApplication::getId, id)
-                       .eq(AgencyAuditApplication::getIsDeleted, 0);
+            queryWrapper.eq(AgencyAuditApplication::getId, id);
             AgencyAuditApplication application = agencyAuditApplicationMapper.selectOne(queryWrapper);
             
             if (application == null) {
@@ -112,9 +112,12 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
             
             Long agencyId = application.getAgencyId();
             
-            // 2. 将申请标记为已删除（软删除）
-            application.setIsDeleted(1);
-            agencyAuditApplicationMapper.updateById(application);
+            // 2. 更新申请审核状态为审核通过（2）
+            LambdaUpdateWrapper<AgencyAuditApplication> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(AgencyAuditApplication::getId, application.getId())
+                        .set(AgencyAuditApplication::getAuditStatus, 2);
+            agencyAuditApplicationMapper.update(null, updateWrapper);
+            
             
             // 3. 更新代理商审核状态为通过（2）
             agencyMapper.updateAuditStatus(agencyId, 2);
@@ -256,8 +259,7 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
         try {
             // 1. 查询申请信息
             LambdaQueryWrapper<AgencyAuditApplication> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AgencyAuditApplication::getId, id)
-                       .eq(AgencyAuditApplication::getIsDeleted, 0);
+            queryWrapper.eq(AgencyAuditApplication::getId, id);
             AgencyAuditApplication application = agencyAuditApplicationMapper.selectOne(queryWrapper);
             
             if (application == null) {
@@ -266,9 +268,12 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
             
             Long agencyId = application.getAgencyId();
             
-            // 2. 将申请标记为已删除（软删除）
-            application.setIsDeleted(1);
-            agencyAuditApplicationMapper.updateById(application);
+            // 2. 更新申请审核状态为审核不通过（3）
+            LambdaUpdateWrapper<AgencyAuditApplication> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(AgencyAuditApplication::getId, application.getId())
+                        .set(AgencyAuditApplication::getAuditStatus, 3);
+            agencyAuditApplicationMapper.update(null, updateWrapper);
+            
             
             // 3. 更新代理商审核状态为不通过（3）
             agencyMapper.updateAuditStatus(agencyId, 3);
@@ -279,4 +284,5 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
             throw new RuntimeException("审核失败：" + e.getMessage());
         }
     }
+
 }

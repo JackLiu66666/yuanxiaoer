@@ -118,10 +118,9 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
      */
     @Override
     public AgencyAuditApplication getApplicationById(Long id) {
-        // 1. 构建查询条件（排除软删除数据）
+        // 1. 从数据库查询数据（不再检查 is_deleted，改为检查 audit_status）
         LambdaQueryWrapper<AgencyAuditApplication> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(AgencyAuditApplication::getId, id)
-                   .eq(AgencyAuditApplication::getIsDeleted, 0);
+        queryWrapper.eq(AgencyAuditApplication::getId, id);
         
         // 2. 从数据库查询数据
         AgencyAuditApplication application = applicationMapper.selectOne(queryWrapper);

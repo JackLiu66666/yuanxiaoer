@@ -4,7 +4,7 @@
 <mapper namespace="com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper">
     <select id="countByAgencyId" resultType="java.lang.Integer">
         SELECT COUNT(1) FROM agency_audit_application 
-        WHERE agency_id = #{agencyId} AND is_deleted = 0
+        WHERE agency_id = #{agencyId}
     </select>
     <!-- 定义审核状态转换的 SQL 片段 -->
     <sql id="auditStatusText">
@@ -22,8 +22,14 @@
         SELECT 
             app.id,
             app.agency_full_name,
-            ag.audit_status,
-            <include refid="auditStatusText"/> AS audit_status_text
+            app.audit_status,
+            CASE app.audit_status
+                WHEN 0 THEN '未审核'
+                WHEN 1 THEN '待审核'
+                WHEN 2 THEN '审核通过'
+                WHEN 3 THEN '审核不通过'
+                ELSE '未知'
+            END AS audit_status_text
         FROM agency_audit_application app
         LEFT JOIN agency ag ON app.agency_id = ag.id
         ORDER BY app.id DESC

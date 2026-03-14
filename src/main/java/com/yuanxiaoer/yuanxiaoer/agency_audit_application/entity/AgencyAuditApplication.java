@@ -85,7 +85,10 @@ public class AgencyAuditApplication {
     // 申请日期
     private LocalDate applyDate;
     
-    // 软删除标识
+    // 审核状态：0-未审核，1-待审核，2-审核通过，3-审核不通过（默认为 1-待审核）
+    private Integer auditStatus;
+    
+    // 软删除标识（保留字段，暂不使用）
     @TableLogic
     private Integer isDeleted;
     
