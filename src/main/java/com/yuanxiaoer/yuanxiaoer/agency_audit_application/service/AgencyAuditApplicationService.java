@@ -1,10 +1,11 @@
 package com.yuanxiaoer.yuanxiaoer.agency_audit_application.service;
 
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
-import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaItem;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
+import com.yuanxiaoer.yuanxiaoer.common.util.CooperationAreaItem;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -7,9 +7,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalMapper;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
+import com.yuanxiaoer.yuanxiaoer.common.util.CooperationAreaItem;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.mapper.AgencyAuditApplicationMapper;
-import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaItem;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
@@ -171,7 +171,7 @@ public class AgencyAuditApplicationServiceImpl extends ServiceImpl<AgencyAuditAp
                 List<Integer> codes = JSON.parseArray(application.getBusinessScope(), Integer.class);
                 List<String> businessNames = new ArrayList<>();
                 for (Integer code : codes) {
-                    businessNames.add(com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.BusinessScopeEnum.getName(code));
+                    businessNames.add(com.yuanxiaoer.yuanxiaoer.common.util.BusinessScopeEnum.getName(code));
                 }
                 // 将业务名称列表转为 JSON 字符串存储回字段
                 application.setBusinessScope(JSON.toJSONString(businessNames));

@@ -2,9 +2,6 @@ package com.yuanxiaoer.yuanxiaoer.agency_audit_application.controller;
 
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.service.AgencyAuditApplicationService;
-import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.BusinessScopeUtil;
-import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaItem;
-import com.yuanxiaoer.yuanxiaoer.agency_audit_application.util.CooperationAreaUtil;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
@@ -14,6 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
+import com.yuanxiaoer.yuanxiaoer.common.util.BusinessScopeUtil;
+import com.yuanxiaoer.yuanxiaoer.common.util.CooperationAreaItem;
+import com.yuanxiaoer.yuanxiaoer.common.util.CooperationAreaUtil;
+
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.yuanxiaoer.yuanxiaoer.agency_audit_application.util;
+package com.yuanxiaoer.yuanxiaoer.common.util;
 
 /**
  * 业务范围枚举

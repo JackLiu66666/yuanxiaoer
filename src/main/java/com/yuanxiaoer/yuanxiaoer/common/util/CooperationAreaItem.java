@@ -1,4 +1,4 @@
-package com.yuanxiaoer.yuanxiaoer.agency_audit_application.util;
+package com.yuanxiaoer.yuanxiaoer.common.util;
 
 import lombok.Data;
 import java.util.List;
