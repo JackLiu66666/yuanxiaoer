@@ -1,4 +1,4 @@
-package com.yuanxiaoer.yuanxiaoer.admin.service;
+package com.yuanxiaoer.yuanxiaoer.admin.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -10,6 +10,8 @@ import com.yuanxiaoer.yuanxiaoer.admin.entity.AgencyBusinessScopeRelation;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.HospitalAgencyRelation;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.SysAdmin;
 import com.yuanxiaoer.yuanxiaoer.admin.mapper.SysAdminMapper;
+import com.yuanxiaoer.yuanxiaoer.admin.service.AgencyInfoService;
+import com.yuanxiaoer.yuanxiaoer.admin.service.SysAdminService;
 import com.yuanxiaoer.yuanxiaoer.admin.mapper.AgencyBusinessScopeRelationMapper;
 import com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalAgencyRelationMapper;
 import com.yuanxiaoer.yuanxiaoer.admin.mapper.HospitalMapper;
@@ -20,6 +22,7 @@ import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -86,6 +89,12 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
     
     @Autowired
     private HospitalMapper hospitalMapper;
+    
+    @Autowired
+    private AgencyInfoService agencyInfoService;
+    
+    @Value("${upload.base-path}")
+    private String uploadBasePath;
 
     @Override
     public IPage<AgencyApplyVO> getApplyList(Page<AgencyApplyVO> page) {
@@ -239,6 +248,17 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
                     // 记录错误但不影响主流程
                     System.err.println("处理业务范围失败：" + e.getMessage());
                 }
+            }
+            
+            // 6. 创建代理商信息（从申请表复制数据）
+            try {
+                boolean created = agencyInfoService.createFromApplication(application, uploadBasePath);
+                if (!created) {
+                    System.err.println("创建代理商信息失败，agencyId: " + agencyId);
+                }
+            } catch (Exception e) {
+                // 记录错误但不影响主流程
+                System.err.println("创建代理商信息失败：" + e.getMessage());
             }
             
             return Result.success("审核通过");
