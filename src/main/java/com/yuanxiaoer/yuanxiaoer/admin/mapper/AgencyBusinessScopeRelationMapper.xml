@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuanxiaoer.yuanxiaoer.admin.mapper.AgencyBusinessScopeRelationMapper">
+
+    <!-- 根据业务范围代码查询代理商列表 -->
+    <select id="getAgenciesByBusinessScope" resultType="com.yuanxiaoer.yuanxiaoer.admin.vo.BusinessScopeAgencyVO">
+        SELECT DISTINCT 
+            ai.agency_id AS agencyId,
+            ai.agency_full_name AS agencyFullName
+        FROM agency_business_scope_relation absr
+        INNER JOIN agency_info ai ON absr.agency_id = ai.agency_id
+        WHERE absr.business_scope = #{businessScope}
+          AND ai.agency_id IS NOT NULL
+        ORDER BY ai.agency_full_name
+    </select>
+</mapper>
