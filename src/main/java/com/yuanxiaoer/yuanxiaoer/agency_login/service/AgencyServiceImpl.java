@@ -19,26 +19,31 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
 
     @Override
     public Result<?> register(Agency agency) {
-        // 1. 校验用户名是否重复
+        // 1. 校验用户名是否为手机号格式
+        if (isPhoneNumber(agency.getUsername())) {
+            return Result.error("用户名不能是手机号格式");
+        }
+
+        // 2. 校验用户名是否重复
         LambdaQueryWrapper<Agency> usernameWrapper = new LambdaQueryWrapper<>();
         usernameWrapper.eq(Agency::getUsername, agency.getUsername());
         if (this.count(usernameWrapper) > 0) {
             return Result.error("用户名已存在");
         }
 
-        // 2. 校验手机号是否重复
+        // 3. 校验手机号是否重复
         LambdaQueryWrapper<Agency> phoneWrapper = new LambdaQueryWrapper<>();
         phoneWrapper.eq(Agency::getPhone, agency.getPhone());
         if (this.count(phoneWrapper) > 0) {
             return Result.error("手机号已存在");
         }
 
-        // 3. 密码加密
+        // 4. 密码加密
         agency.setPassword(passwordEncoder.encode(agency.getPassword()));
-        // 4. 默认审核状态：0-未审核
+        // 5. 默认审核状态：0-未审核
         agency.setAuditStatus(0);
 
-        // 5. 保存数据
+        // 6. 保存数据
         boolean save = this.save(agency);
         if (save) {
             return Result.success("注册成功，请等待审核");
@@ -47,9 +52,19 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
         }
     }
 
+    /**
+     * 判断字符串是否为手机号格式（11 位数字，以 1 开头）
+     */
+    private boolean isPhoneNumber(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        return str.matches("^1[3-9]\\d{9}$");
+    }
+
     @Override
     public Result<?> login(String loginKey, String password) {
-        // 1. 根据手机号/ID/用户名查询代理商
+        // 1. 根据手机号/用户名查询代理商（已取消 ID 登录）
         Agency agency = this.baseMapper.selectByLoginKey(loginKey);
         if (agency == null) {
             return Result.error("用户不存在");
@@ -60,8 +75,8 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
             return Result.error("密码错误");
         }
 
-        // 4. 登录成功：移除密码，返回用户信息（供存入Session）
+        // 3. 登录成功：移除密码，返回用户信息（供存入 Session）
         agency.setPassword(null); // 敏感信息置空
-        return Result.success(agency); // 原代码返回"登录成功..."，现在返回agent对象
+        return Result.success(agency); // 原代码返回"登录成功..."，现在返回 agent 对象
     }
 }

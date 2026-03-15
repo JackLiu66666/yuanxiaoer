@@ -23,6 +23,7 @@ import com.yuanxiaoer.yuanxiaoer.common.Result;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -35,6 +36,9 @@ import java.util.Map;
  */
 @Service
 public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> implements SysAdminService {
+
+    // 密码加密器
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
      * 管理员登录
@@ -61,12 +65,13 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
             return Result.error("账号不存在");
         }
 
-        // 4. 校验密码（实际项目要加密后对比，这里先明文）
-        if (!sysAdmin.getPassword().equals(loginDTO.getPassword())) {
+        // 4. 校验密码（使用 BCrypt 加密比对）
+        if (!passwordEncoder.matches(loginDTO.getPassword(), sysAdmin.getPassword())) {
             return Result.error("密码错误");
         }
 
-        // 5. 登录成功（实际项目这里要生成token，这里简化）
+        // 5. 登录成功，移除密码后返回
+        sysAdmin.setPassword(null); // 敏感信息置空
         return Result.success(sysAdmin);
     }
 

@@ -30,15 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/admin")
 public class SysAdminController {
 
-    private final SysAdminService sysAdminService;
+    @Resource
+    private SysAdminService sysAdminService;
 
     @Resource
     private AgencyAuditApplicationService applicationService;
-
-    // 构造器注入
-    public SysAdminController(SysAdminService sysAdminService) {
-        this.sysAdminService = sysAdminService;
-    }
 
     /**
      * 登录接口

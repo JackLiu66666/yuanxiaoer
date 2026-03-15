@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface AgencyMapper extends BaseMapper<Agency> {
     /**
-     * 根据手机号/ID/用户名查询代理商
+     * 根据手机号/用户名查询代理商
      */
     Agency selectByLoginKey(@Param("loginKey") String loginKey);
     /**
