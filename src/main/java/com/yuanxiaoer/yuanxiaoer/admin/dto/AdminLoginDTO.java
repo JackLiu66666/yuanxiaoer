@@ -6,7 +6,7 @@ import lombok.Data;
  * 登录请求参数
  */
 @Data
-public class LoginDTO {
+public class AdminLoginDTO {
     /**
      * 管理员账号
      */

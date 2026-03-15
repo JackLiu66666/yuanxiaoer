@@ -3,6 +3,9 @@ package com.yuanxiaoer.yuanxiaoer.ic_audit_application.controller;
 import com.yuanxiaoer.yuanxiaoer.ic_audit_application.entity.ICAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.ic_audit_application.service.ICAuditApplicationService;
 import com.yuanxiaoer.yuanxiaoer.ic_login.entity.InsuranceCompany;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +15,10 @@ import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 保险公司审核申请控制器
+ */
+@Tag(name = "保险公司审核申请", description = "保险公司入驻申请、审核状态查询接口")
 @RestController
 @RequestMapping("/icAuditApplication")
 public class ICAuditApplicationController {
@@ -19,13 +26,14 @@ public class ICAuditApplicationController {
     @Autowired
     private ICAuditApplicationService applicationService;
 
-        /**
+    /**
      * 提交保险公司审核申请
      */
+    @Operation(summary = "提交保险公司审核申请", description = "保险公司填写并提交入驻申请资料，包括盖章文件上传")
     @PostMapping("/submit")
     public ResponseEntity<Map<String, Object>> submitApplication(
             ICAuditApplication application,
-            @RequestParam("sealFile") MultipartFile sealFile,
+            @Parameter(description = "盖章文件", required = true) @RequestParam("sealFile") MultipartFile sealFile,
             HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         try {
@@ -49,6 +57,7 @@ public class ICAuditApplicationController {
     /**
      * 检查当前保险公司是否已提交申请
      */
+    @Operation(summary = "检查是否已提交申请", description = "检查当前登录的保险公司是否已经提交过审核申请")
     @GetMapping("/check-applied")
     public ResponseEntity<Map<String, Object>> checkApplied(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
@@ -64,9 +73,11 @@ public class ICAuditApplicationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
         }
     }
+    
     /**
      * 获取保险公司审核状态
      */
+    @Operation(summary = "获取审核状态", description = "获取当前保险公司的审核状态（0-未审核/1-待审核/2-通过/3-不通过）")
     @GetMapping("/audit-status")
     public ResponseEntity<Map<String, Object>> getAuditStatus(HttpSession session) {
         Map<String, Object> result = new HashMap<>();

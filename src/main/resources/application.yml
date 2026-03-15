@@ -43,6 +43,41 @@ server:
         secure: false
         http-only: true
 
+# SpringDoc/Knife4j 配置
+springdoc:
+  api-docs:
+    enabled: true  # 生产环境建议改为 false
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true  # 生产环境建议改为 false
+    path: /swagger-ui.html
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.yuanxiaoer.yuanxiaoer
+
+# Knife4j 配置
+knife4j:
+  enable: true  # 生产环境建议改为 false
+  setting:
+    language: zh-CN
+    swagger-model-name: 实体类列表
+    enable-document-manage: true
+    enable-home-custom: true
+    enable-footer: false
+    enable-footer-custom: true
+    footer-custom-content: Apache License 2.0 | Copyright &copy; 2025 Yuanxiaoer
+
+# 生产环境配置示例（实际应用时取消注释）
+# ---
+# spring:
+#   profiles:
+#     active: prod  # 通过激活不同 profile 来控制
+# 
+# ---
+# 或者使用条件配置：
+# knife4j.production=false  # 自定义配置，配合代码逻辑控制
+
 upload:
   # 文件上传根路径（项目根目录下upload）
   base-path: ${user.dir}/../upload/

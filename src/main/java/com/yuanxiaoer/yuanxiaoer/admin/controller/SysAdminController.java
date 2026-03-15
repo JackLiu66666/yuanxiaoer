@@ -2,13 +2,16 @@ package com.yuanxiaoer.yuanxiaoer.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yuanxiaoer.yuanxiaoer.admin.dto.LoginDTO;
+import com.yuanxiaoer.yuanxiaoer.admin.dto.AdminLoginDTO;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.SysAdmin;
 import com.yuanxiaoer.yuanxiaoer.admin.service.SysAdminService;
 import com.yuanxiaoer.yuanxiaoer.admin.vo.AgencyApplyVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.entity.AgencyAuditApplication;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.service.AgencyAuditApplicationService;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 管理员控制器
  */
+@Tag(name = "系统管理员管理", description = "管理员登录、登出及审核管理接口")
 @RestController
 @RequestMapping("/admin")
 public class SysAdminController {
@@ -41,8 +45,9 @@ public class SysAdminController {
      * @param loginDTO 登录参数
      * @return 登录结果
      */
+    @Operation(summary = "管理员登录", description = "管理员通过账号密码登录系统")
     @PostMapping("/login")
-    public Result<SysAdmin> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
+    public Result<SysAdmin> login(@RequestBody AdminLoginDTO loginDTO, HttpSession session) {
         Result<SysAdmin> result = sysAdminService.login(loginDTO);
         if (result.getCode() == 200) {
             session.setAttribute("loginAdmin", result.getData());
@@ -53,22 +58,24 @@ public class SysAdminController {
      * 登出接口
      * @return 登出结果
     */
+    @Operation(summary = "管理员登出", description = "退出当前登录状态")
     @PostMapping("/logout")
     public Result<?> logout(HttpSession session) {
         session.removeAttribute("loginAdmin"); // 移除登录态
-        session.invalidate(); // 销毁Session
+        session.invalidate(); // 销毁 Session
         return Result.success("退出登录成功");
     }
 
     /**
      * 分页查询代理商申请列表
-     * @param current 当前页（默认1）
-     * @param size 每页条数（默认20）
+     * @param current 当前页（默认 1）
+     * @param size 每页条数（默认 20）
      */
+    @Operation(summary = "分页查询代理商申请列表", description = "查询待审核的代理商申请记录")
     @GetMapping("/agencyApplicationReview/list")
     public Result<IPage<AgencyApplyVO>> getApplyList(
-            @RequestParam(defaultValue = "1") Long current,
-            @RequestParam(defaultValue = "20") Long size,
+            @Parameter(description = "当前页码", example = "1") @RequestParam(defaultValue = "1") Long current,
+            @Parameter(description = "每页条数", example = "20") @RequestParam(defaultValue = "20") Long size,
             HttpSession session) {
         // 1. 登录状态验证（Controller层处理请求相关的验证）
         Object loginAdmin = session.getAttribute("loginAdmin");
@@ -87,8 +94,11 @@ public class SysAdminController {
      * @param session 会话（验证登录）
      * @return 表单数据
      */
+    @Operation(summary = "查询代理商申请详情", description = "根据申请 ID 查看详细的申请表单信息")
     @GetMapping("/agencyApplicationReview/list/{id}")
-    public Result<AgencyAuditApplication> getApplicationById(@PathVariable Long id, HttpSession session) {
+    public Result<AgencyAuditApplication> getApplicationById(
+            @Parameter(description = "申请表 ID", example = "1") @PathVariable Long id, 
+            HttpSession session) {
         // 1. 登录状态验证（Controller 层处理请求相关的验证）
         Object loginAdmin = session.getAttribute("loginAdmin");
         if (loginAdmin == null) {
@@ -111,8 +121,11 @@ public class SysAdminController {
      * @param session 会话（验证登录）
      * @return 审核结果
      */
+    @Operation(summary = "审核通过代理商申请", description = "将待审核的代理商申请标记为审核通过")
     @PostMapping("/agencyApplicationReview/approve/{id}")
-    public Result<String> approveApplication(@PathVariable Long id, HttpSession session) {
+    public Result<String> approveApplication(
+            @Parameter(description = "申请 ID", example = "1") @PathVariable Long id, 
+            HttpSession session) {
         // 1. 登录状态验证
         Object loginAdmin = session.getAttribute("loginAdmin");
         if (loginAdmin == null) {
@@ -129,8 +142,11 @@ public class SysAdminController {
      * @param session 会话（验证登录）
      * @return 审核结果
      */
+    @Operation(summary = "审核不通过代理商申请", description = "将待审核的代理商申请标记为审核不通过")
     @PostMapping("/agencyApplicationReview/reject/{id}")
-    public Result<String> rejectApplication(@PathVariable Long id, HttpSession session) {
+    public Result<String> rejectApplication(
+            @Parameter(description = "申请 ID", example = "1") @PathVariable Long id, 
+            HttpSession session) {
         // 1. 登录状态验证
         Object loginAdmin = session.getAttribute("loginAdmin");
         if (loginAdmin == null) {

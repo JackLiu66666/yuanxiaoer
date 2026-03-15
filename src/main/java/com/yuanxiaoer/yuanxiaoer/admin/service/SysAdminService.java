@@ -1,6 +1,6 @@
 package com.yuanxiaoer.yuanxiaoer.admin.service;
 
-import com.yuanxiaoer.yuanxiaoer.admin.dto.LoginDTO;
+import com.yuanxiaoer.yuanxiaoer.admin.dto.AdminLoginDTO;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.SysAdmin;
 import com.yuanxiaoer.yuanxiaoer.admin.vo.AgencyApplyVO;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
@@ -19,7 +19,7 @@ public interface SysAdminService extends IService<SysAdmin> {
      * @param loginDTO 登录参数
      * @return 登录结果
      */
-    Result<SysAdmin> login(LoginDTO loginDTO);
+    Result<SysAdmin> login(AdminLoginDTO loginDTO);
 
     /**
      * 分页查询代理商申请列表

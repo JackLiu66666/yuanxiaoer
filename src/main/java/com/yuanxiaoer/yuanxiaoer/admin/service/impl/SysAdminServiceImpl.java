@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yuanxiaoer.yuanxiaoer.admin.dto.LoginDTO;
+import com.yuanxiaoer.yuanxiaoer.admin.dto.AdminLoginDTO;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.AgencyBusinessScopeRelation;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.HospitalAgencyRelation;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.SysAdmin;
@@ -42,7 +42,7 @@ public class SysAdminServiceImpl extends ServiceImpl<SysAdminMapper, SysAdmin> i
      * @return 登录结果
      */
     @Override
-    public Result<SysAdmin> login(LoginDTO loginDTO) {
+    public Result<SysAdmin> login(AdminLoginDTO loginDTO) {
         // 1. 校验参数
         if (loginDTO.getUsername() == null || loginDTO.getUsername().isEmpty()) {
             return Result.error("账号不能为空");

@@ -5,6 +5,9 @@ import com.yuanxiaoer.yuanxiaoer.agency_audit_application.service.AgencyAuditApp
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.CityVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.ProvinceVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 代理商审核申请控制器
+ */
+@Tag(name = "代理商审核申请", description = "代理商入驻申请、审核状态查询及基础数据接口")
 @RestController
 @RequestMapping("/agencyAuditApplication")
 public class AgencyAuditApplicationController {
@@ -33,10 +40,11 @@ public class AgencyAuditApplicationController {
     /**
      * 提交代理商审核申请
      */
+    @Operation(summary = "提交代理商审核申请", description = "代理商提交入驻申请资料，包括基本信息和盖章文件")
     @PostMapping("/submit")
     public ResponseEntity<Map<String, Object>> submitApplication(
             AgencyAuditApplication application,
-            @RequestParam("sealFile") MultipartFile sealFile,
+            @Parameter(description = "盖章文件", required = true) @RequestParam("sealFile") MultipartFile sealFile,
             HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         try {
@@ -60,6 +68,7 @@ public class AgencyAuditApplicationController {
     /**
      * 检查当前代理商是否已提交申请
      */
+    @Operation(summary = "检查是否已提交申请", description = "检查当前登录的代理商是否已经提交过审核申请")
     @GetMapping("/check-applied")
     public ResponseEntity<Map<String, Object>> checkApplied(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
@@ -79,6 +88,7 @@ public class AgencyAuditApplicationController {
     /**
      * 获取代理商审核状态
      */
+    @Operation(summary = "获取审核状态", description = "获取当前代理商的审核状态（0-未审核/1-待审核/2-通过/3-不通过）")
     @GetMapping("/audit-status")
     public ResponseEntity<Map<String, Object>> getAuditStatus(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
@@ -107,6 +117,7 @@ public class AgencyAuditApplicationController {
      * 获取所有省份列表
      * @return 省份列表
      */
+    @Operation(summary = "获取省份列表", description = "获取所有可选择的省份数据，用于代理商申请时选择合作区域")
     @GetMapping("/provinces")
     public ResponseEntity<Map<String, Object>> getProvinces() {
         Map<String, Object> result = new HashMap<>();
@@ -127,8 +138,10 @@ public class AgencyAuditApplicationController {
      * @param province 省份名称
      * @return 城市列表
      */
+    @Operation(summary = "获取城市列表", description = "根据指定省份获取该省下的城市列表")
     @GetMapping("/cities")
-    public ResponseEntity<Map<String, Object>> getCitiesByProvince(@RequestParam("province") String province) {
+    public ResponseEntity<Map<String, Object>> getCitiesByProvince(
+            @Parameter(description = "省份名称", example = "广东省", required = true) @RequestParam("province") String province) {
         Map<String, Object> result = new HashMap<>();
         try {
             if (province == null || province.trim().isEmpty()) {
@@ -153,8 +166,10 @@ public class AgencyAuditApplicationController {
      * @param city 城市名称
      * @return 医院列表（包含 id 和名称）
      */
+    @Operation(summary = "获取医院列表", description = "根据指定城市获取该城市下的医院列表")
     @GetMapping("/hospitals")
-    public ResponseEntity<Map<String, Object>> getHospitalsByCity(@RequestParam("city") String city) {
+    public ResponseEntity<Map<String, Object>> getHospitalsByCity(
+            @Parameter(description = "城市名称", example = "广州市", required = true) @RequestParam("city") String city) {
         Map<String, Object> result = new HashMap<>();
         try {
             if (city == null || city.trim().isEmpty()) {
@@ -179,8 +194,10 @@ public class AgencyAuditApplicationController {
      * @param codes 业务代码列表，如 [1,2,3]
      * @return 验证结果
      */
+    @Operation(summary = "验证业务范围", description = "验证提交的业务范围代码是否有效，并返回对应的业务名称")
     @PostMapping("/validate-business-scope")
-    public ResponseEntity<Map<String, Object>> validateBusinessScope(@RequestBody List<Integer> codes) {
+    public ResponseEntity<Map<String, Object>> validateBusinessScope(
+            @Parameter(description = "业务代码列表，如 [1,2,3]", required = true) @RequestBody List<Integer> codes) {
         Map<String, Object> result = new HashMap<>();
         try {
             boolean isValid = agencyAuditApplicationService.validateBusinessScope(codes);
@@ -206,8 +223,10 @@ public class AgencyAuditApplicationController {
      * @param items 合作区域列表
      * @return 验证结果
      */
+    @Operation(summary = "验证合作区域", description = "验证提交的合作区域数据是否有效，并返回格式化显示文本和总医院数量")
     @PostMapping("/validate-cooperation-area")
-    public ResponseEntity<Map<String, Object>> validateCooperationArea(@RequestBody List<CooperationAreaItem> items) {
+    public ResponseEntity<Map<String, Object>> validateCooperationArea(
+            @Parameter(description = "合作区域列表", required = true) @RequestBody List<CooperationAreaItem> items) {
         Map<String, Object> result = new HashMap<>();
         try {
             boolean isValid = agencyAuditApplicationService.validateCooperationArea(items);

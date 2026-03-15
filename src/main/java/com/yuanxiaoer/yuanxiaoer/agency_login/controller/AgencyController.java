@@ -1,9 +1,11 @@
 package com.yuanxiaoer.yuanxiaoer.agency_login.controller;
 
 import com.yuanxiaoer.yuanxiaoer.common.Result;
-import com.yuanxiaoer.yuanxiaoer.agency_login.dto.LoginDTO;
+import com.yuanxiaoer.yuanxiaoer.agency_login.dto.AgencyLoginDTO;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.service.AgencyService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +15,9 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpSession;
 
 /**
- * 代理商控制器（RESTful风格）
+ * 代理商控制器（RESTful 风格）
  */
+@Tag(name = "代理商登录", description = "代理商注册、登录、登出及首页接口")
 @RestController
 @RequestMapping("/agency")
 public class AgencyController {
@@ -25,6 +28,7 @@ public class AgencyController {
     /**
      * 注册接口
      */
+    @Operation(summary = "代理商注册", description = "新用户注册成为代理商")
     @PostMapping("/register")
     public Result<?> register(@RequestBody Agency agency) {
         return agencyService.register(agency);
@@ -33,8 +37,9 @@ public class AgencyController {
     /**
      * 登录接口
      */
+    @Operation(summary = "代理商登录", description = "代理商通过账号密码登录系统")
     @PostMapping("/login")
-    public Result<?> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
+    public Result<?> login(@RequestBody AgencyLoginDTO loginDTO, HttpSession session) {
         String loginKey = loginDTO.getLoginKey();
         String password = loginDTO.getPassword();
         Result<?> result = agencyService.login(loginKey, password);
@@ -50,6 +55,7 @@ public class AgencyController {
     /**
      * 代理商首页（登录后进入）
      */
+    @Operation(summary = "代理商首页", description = "获取代理商登录后的首页欢迎信息")
     @GetMapping("/index")
     public Result<?> index(HttpSession session) {
         Agency loginAgency = (Agency) session.getAttribute("loginAgency");
@@ -63,6 +69,7 @@ public class AgencyController {
     /**
      * 退出登录接口
      */
+    @Operation(summary = "代理商登出", description = "代理商退出登录，销毁 Session")
     @GetMapping("/logout")
     public Result<?> logout(HttpSession session) {
         session.removeAttribute("loginAgency"); // 移除登录态

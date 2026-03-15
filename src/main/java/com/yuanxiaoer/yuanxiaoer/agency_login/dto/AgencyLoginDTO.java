@@ -1,4 +1,4 @@
-package com.yuanxiaoer.yuanxiaoer.ic_login.dto;
+package com.yuanxiaoer.yuanxiaoer.agency_login.dto;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * 登录请求参数
  */
 @Data
-public class LoginDTO {
+public class AgencyLoginDTO {
     /**
      * 代理商账号loginKey
      */

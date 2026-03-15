@@ -1,9 +1,11 @@
 package com.yuanxiaoer.yuanxiaoer.ic_login.controller;
 
 import com.yuanxiaoer.yuanxiaoer.common.Result;
-import com.yuanxiaoer.yuanxiaoer.ic_login.dto.LoginDTO;
+import com.yuanxiaoer.yuanxiaoer.ic_login.dto.ICLoginDTO;
 import com.yuanxiaoer.yuanxiaoer.ic_login.entity.InsuranceCompany;
 import com.yuanxiaoer.yuanxiaoer.ic_login.service.InsuranceCompanyService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +17,7 @@ import jakarta.servlet.http.HttpSession;
 /**
  * 保险公司控制器
  */
+@Tag(name = "保险公司登录", description = "保险公司注册、登录、登出及首页接口")
 @RestController
 @RequestMapping("/insurance_company")
 public class InsuranceCompanyController {
@@ -25,6 +28,7 @@ public class InsuranceCompanyController {
     /**
      * 注册接口
      */
+    @Operation(summary = "保险公司注册", description = "新用户注册成为保险公司")
     @PostMapping("/register")
     public Result<?> register(@RequestBody InsuranceCompany insuranceCompany) {
         return insuranceCompanyService.register(insuranceCompany);
@@ -33,8 +37,9 @@ public class InsuranceCompanyController {
     /**
      * 登录接口
      */
+    @Operation(summary = "保险公司登录", description = "保险公司通过账号密码登录系统")
     @PostMapping("/login")
-    public Result<?> login(@RequestBody LoginDTO loginDTO, HttpSession session) {
+    public Result<?> login(@RequestBody ICLoginDTO loginDTO, HttpSession session) {
         String loginKey = loginDTO.getLoginKey();
         String password = loginDTO.getPassword();
         Result<?> result = insuranceCompanyService.login(loginKey, password);
@@ -50,6 +55,7 @@ public class InsuranceCompanyController {
     /**
      * 保险公司首页（登录后进入）
      */
+    @Operation(summary = "保险公司首页", description = "获取保险公司登录后的首页欢迎信息")
     @GetMapping("/index")
     public Result<?> index(HttpSession session) {
         InsuranceCompany loginInsuranceCompany = (InsuranceCompany) session.getAttribute("loginIC");
@@ -63,6 +69,7 @@ public class InsuranceCompanyController {
     /**
      * 退出登录接口
      */
+    @Operation(summary = "保险公司登出", description = "保险公司退出登录，销毁 Session")
     @GetMapping("/logout")
     public Result<?> logout(HttpSession session) {
         session.removeAttribute("loginIC"); // 移除登录态
