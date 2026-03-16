@@ -8,6 +8,30 @@ spring:
     url: jdbc:mysql://localhost:3306/YX2_demo?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root  # 替换为你的数据库账号
     password: Lhx20020916  # 替换为你的数据库密码
+    # HikariCP 连接池配置
+    hikari:
+      # 连接池名称
+      pool-name: YuanxiaoerHikariCP
+      # 最小空闲连接数
+      minimum-idle: 5
+      # 最大连接数（根据应用并发量调整，一般设置为 CPU 核心数*2 + 1）
+      maximum-pool-size: 20
+      # 连接空闲超时时间（毫秒），连接超过此时间将被释放
+      idle-timeout: 600000
+      # 连接超时时间（毫秒），获取连接超时将抛出异常
+      connection-timeout: 30000
+      # 连接最大生命周期（毫秒），建议设置为数据库等待超时的 60-70%
+      max-lifetime: 1800000
+      # 连接测试查询（MySQL 默认使用 SELECT 1）
+      connection-test-query: SELECT 1
+      # 是否启用 JMX MBean 注册（用于监控）
+      register-mbeans: true
+      # 连接测试超时时间（毫秒）
+      validation-timeout: 5000
+      # 泄漏检测阈值（毫秒），超过此时间的连接未归还将被记录警告
+      leak-detection-threshold: 60000
+      # 初始化完成后执行的 SQL（可选）
+      # initialization-fail-timeout: -1
   servlet:
     multipart:
       enabled: true
