@@ -46,4 +46,4 @@ upload:
   # 访问路径前缀
   base-url: http://39.108.70.20:8080/upload/
 cors:
-  allowed-origins: http://39.108.70.20
+  allowed-origins: http://39.108.70.20:8080
