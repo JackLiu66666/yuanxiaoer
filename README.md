@@ -20,3 +20,6 @@ docker network connect YX2-network yuanxiaoer-frontend
 
 验证网络连接
 docker network inspect YX2-network
+
+# 强制放行 Docker 内部网桥的所有流量（这条规则会插在最前面）
+iptables -I FORWARD -i br-9efac11709e2 -j ACCEPT
