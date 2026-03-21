@@ -79,4 +79,13 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
         agency.setPassword(null); // 敏感信息置空
         return Result.success(agency); // 原代码返回"登录成功..."，现在返回 agent 对象
     }
+
+    @Override
+    public Integer getAuditStatusById(Long agencyId) {
+        Agency agency = this.getById(agencyId);
+        if (agency == null) {
+            return null;
+        }
+        return agency.getAuditStatus();
+    }
 }

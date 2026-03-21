@@ -43,10 +43,11 @@ public class AgencyController {
         String loginKey = loginDTO.getLoginKey();
         String password = loginDTO.getPassword();
         Result<?> result = agencyService.login(loginKey, password);
-        // 登录成功，存入Session
+        // 登录成功，存入 Session（auditStatus 字段不存储）
         if (result.getCode() == 200) {
             Agency agency = (Agency) result.getData();
-            session.setAttribute("loginAgency", agency); // 存入登录用户
+            agency.setAuditStatus(null); // 将 auditStatus 置为 null，不存入 session
+            session.setAttribute("loginAgency", agency);
             result.setMsg("登录成功，即将进入代理商界面"); // 重置提示语
         }
         return result;
@@ -75,5 +76,26 @@ public class AgencyController {
         session.removeAttribute("loginAgency"); // 移除登录态
         session.invalidate(); // 销毁Session
         return Result.success("退出登录成功");
+    }
+
+    /**
+     * 获取当前代理商审核状态
+     */
+    @Operation(summary = "获取审核状态", description = "查询当前登录代理商的审核状态")
+    @GetMapping("/getAgencyauditStatus")
+    public Result<?> getAgencyauditStatus(HttpSession session) {
+        Agency loginAgency = (Agency) session.getAttribute("loginAgency");
+        if (loginAgency == null) {
+            return Result.error("未登录或登录已过期");
+        }
+        
+        Long agencyId = loginAgency.getId();
+        Integer auditStatus = agencyService.getAuditStatusById(agencyId);
+        
+        if (auditStatus == null) {
+            return Result.error("代理商不存在");
+        }
+        
+        return Result.success(auditStatus);
     }
 }

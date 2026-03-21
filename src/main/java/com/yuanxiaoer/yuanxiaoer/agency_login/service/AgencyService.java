@@ -17,4 +17,9 @@ public interface AgencyService extends IService<Agency> {
      * 代理商登录
      */
     Result<?> login(String loginKey, String password);
+
+    /**
+     * 根据 ID 获取审核状态
+     */
+    Integer getAuditStatusById(Long agencyId);
 }
