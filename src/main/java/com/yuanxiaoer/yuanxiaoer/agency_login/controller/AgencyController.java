@@ -4,6 +4,7 @@ import com.yuanxiaoer.yuanxiaoer.common.Result;
 import com.yuanxiaoer.yuanxiaoer.agency_login.dto.AgencyLoginDTO;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.service.AgencyService;
+import com.yuanxiaoer.yuanxiaoer.agency_login.vo.AgencyInfoVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -118,5 +119,26 @@ public class AgencyController {
         }
         
         return Result.success(businessScope);
+    }
+
+    /**
+     * 获取当前代理商详细信息
+     */
+    @Operation(summary = "获取代理商信息", description = "查询当前登录代理商的详细信息")
+    @GetMapping("/getAgencyInfo")
+    public Result<?> getAgencyInfo(HttpSession session) {
+        Agency loginAgency = (Agency) session.getAttribute("loginAgency");
+        if (loginAgency == null) {
+            return Result.error("未登录或已过期");
+        }
+        
+        Long agencyId = loginAgency.getId();
+        AgencyInfoVO agencyInfoVO = agencyService.getAgencyInfoByAgencyId(agencyId);
+        
+        if (agencyInfoVO == null) {
+            return Result.error("未找到代理商信息，请先申请入驻");
+        }
+        
+        return Result.success(agencyInfoVO);
     }
 }

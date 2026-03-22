@@ -5,15 +5,17 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
+import com.yuanxiaoer.yuanxiaoer.agency_login.vo.AgencyInfoVO;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.AgencyInfo;
 import com.yuanxiaoer.yuanxiaoer.admin.service.AgencyInfoService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 
 /**
- * 代理商Service实现类
+ * 代理商 Service 实现类
  */
 @Service
 public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> implements AgencyService {
@@ -105,5 +107,23 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
 
         // 返回业务范围 JSON 字符串，如果不存在则返回 null
         return agencyInfo != null ? agencyInfo.getBusinessScope() : null;
+    }
+
+    @Override
+    public AgencyInfoVO getAgencyInfoByAgencyId(Long agencyId) {
+        // 根据 agencyId 查询 agency_info 表
+        LambdaQueryWrapper<AgencyInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AgencyInfo::getAgencyId, agencyId);
+        AgencyInfo agencyInfo = agencyInfoService.getOne(wrapper);
+
+        if (agencyInfo == null) {
+            return null;
+        }
+
+        // 将 AgencyInfo 转换为 AgencyInfoVO（排除不需要的字段）
+        AgencyInfoVO vo = new AgencyInfoVO();
+        BeanUtils.copyProperties(agencyInfo, vo);
+        
+        return vo;
     }
 }
