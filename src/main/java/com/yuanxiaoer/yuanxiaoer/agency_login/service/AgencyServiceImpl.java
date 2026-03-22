@@ -5,8 +5,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuanxiaoer.yuanxiaoer.common.Result;
 import com.yuanxiaoer.yuanxiaoer.agency_login.entity.Agency;
 import com.yuanxiaoer.yuanxiaoer.agency_login.mapper.AgencyMapper;
+import com.yuanxiaoer.yuanxiaoer.admin.entity.AgencyInfo;
+import com.yuanxiaoer.yuanxiaoer.admin.service.AgencyInfoService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import jakarta.annotation.Resource;
 
 /**
  * 代理商Service实现类
@@ -16,6 +20,9 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
 
     // 密码加密器
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @Resource
+    private AgencyInfoService agencyInfoService;
 
     @Override
     public Result<?> register(Agency agency) {
@@ -87,5 +94,16 @@ public class AgencyServiceImpl extends ServiceImpl<AgencyMapper, Agency> impleme
             return null;
         }
         return agency.getAuditStatus();
+    }
+
+    @Override
+    public String getBusinessScopeByAgencyId(Long agencyId) {
+        // 根据 agencyId 查询 agency_info 表
+        LambdaQueryWrapper<AgencyInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AgencyInfo::getAgencyId, agencyId);
+        AgencyInfo agencyInfo = agencyInfoService.getOne(wrapper);
+
+        // 返回业务范围 JSON 字符串，如果不存在则返回 null
+        return agencyInfo != null ? agencyInfo.getBusinessScope() : null;
     }
 }

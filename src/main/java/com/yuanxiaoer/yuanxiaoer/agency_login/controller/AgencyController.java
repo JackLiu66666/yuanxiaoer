@@ -86,7 +86,7 @@ public class AgencyController {
     public Result<?> getAgencyauditStatus(HttpSession session) {
         Agency loginAgency = (Agency) session.getAttribute("loginAgency");
         if (loginAgency == null) {
-            return Result.error("未登录或登录已过期");
+            return Result.error("未登录或已过期");
         }
         
         Long agencyId = loginAgency.getId();
@@ -97,5 +97,26 @@ public class AgencyController {
         }
         
         return Result.success(auditStatus);
+    }
+
+    /**
+     * 获取当前代理商业务范围
+     */
+    @Operation(summary = "获取业务范围", description = "查询当前登录代理商的业务范围（JSON 数组）")
+    @GetMapping("/getAgencyBusinessScope")
+    public Result<?> getAgencyBusinessScope(HttpSession session) {
+        Agency loginAgency = (Agency) session.getAttribute("loginAgency");
+        if (loginAgency == null) {
+            return Result.error("未登录或已过期");
+        }
+        
+        Long agencyId = loginAgency.getId();
+        String businessScope = agencyService.getBusinessScopeByAgencyId(agencyId);
+        
+        if (businessScope == null) {
+            return Result.error("未找到代理商信息，请先申请入驻");
+        }
+        
+        return Result.success(businessScope);
     }
 }

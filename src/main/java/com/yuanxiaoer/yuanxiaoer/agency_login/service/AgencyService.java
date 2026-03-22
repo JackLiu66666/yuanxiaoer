@@ -22,4 +22,9 @@ public interface AgencyService extends IService<Agency> {
      * 根据 ID 获取审核状态
      */
     Integer getAuditStatusById(Long agencyId);
+
+    /**
+     * 根据代理商 ID 获取业务范围
+     */
+    String getBusinessScopeByAgencyId(Long agencyId);
 }
