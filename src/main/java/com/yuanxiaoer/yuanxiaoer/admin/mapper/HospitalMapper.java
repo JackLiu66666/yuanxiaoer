@@ -1,6 +1,8 @@
 package com.yuanxiaoer.yuanxiaoer.admin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalSelectVO;
 import com.yuanxiaoer.yuanxiaoer.agency_audit_application.vo.HospitalInfoVO;
@@ -61,4 +63,30 @@ public interface HospitalMapper extends BaseMapper<Hospital> {
      * @return 医院信息列表
      */
     List<HospitalInfoVO> getHospitalsByIds(@Param("hospitalIds") List<Long> hospitalIds);
+    
+    /**
+     * 根据医院名称模糊查询医院信息
+     * @param keyword 搜索关键词
+     * @return 医院信息列表
+     */
+    List<Hospital> searchHospitalsByName(@Param("keyword") String keyword);
+    
+    /**
+     * 根据医院名称模糊查询医院信息（分页）
+     * @param page 分页参数
+     * @param keyword 搜索关键词
+     * @return 分页结果
+     */
+    IPage<Hospital> searchHospitalsByName(Page<Hospital> page, @Param("keyword") String keyword);
+    
+    /**
+     * 根据城市和医院等级查询所有医院（分页）
+     * @param page 分页参数
+     * @param city 城市名称
+     * @param hospitalLevel 医院等级（可选，为空则查询所有等级）
+     * @return 分页结果
+     */
+    IPage<Hospital> getHospitalsByCityAndLevel(Page<Hospital> page, 
+                                                @Param("city") String city, 
+                                                @Param("hospitalLevel") String hospitalLevel);
 }

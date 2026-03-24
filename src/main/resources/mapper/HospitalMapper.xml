@@ -68,4 +68,59 @@
         </foreach>
         ORDER BY id
     </select>
+    
+    <!-- 根据医院名称模糊查询医院信息 -->
+    <select id="searchHospitalsByName" resultType="com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital">
+        SELECT 
+            id,
+            province,
+            city,
+            district_county AS districtCounty,
+            hospital_name AS hospitalName,
+            hospital_level AS hospitalLevel
+        FROM hospital
+        WHERE hospital_name LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY hospital_name
+    </select>
+    
+    <!-- 根据医院名称模糊查询医院信息（分页） -->
+    <select id="searchHospitalsByName" resultType="com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital">
+        SELECT 
+            id,
+            province,
+            city,
+            district_county AS districtCounty,
+            hospital_name AS hospitalName,
+            hospital_level AS hospitalLevel
+        FROM hospital
+        WHERE hospital_name LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY hospital_name
+    </select>
+    
+    <!-- 根据省份查询所有城市（不分页） -->
+    <select id="getAllCitiesByProvince" resultType="java.lang.String">
+        SELECT DISTINCT city 
+        FROM hospital 
+        WHERE province = #{province} 
+          AND city IS NOT NULL 
+          AND city != ''
+        ORDER BY city
+    </select>
+    
+    <!-- 根据城市和医院等级查询所有医院（分页） -->
+    <select id="getHospitalsByCityAndLevel" resultType="com.yuanxiaoer.yuanxiaoer.admin.entity.Hospital">
+        SELECT 
+            id,
+            province,
+            city,
+            district_county AS districtCounty,
+            hospital_name AS hospitalName,
+            hospital_level AS hospitalLevel
+        FROM hospital 
+        WHERE city = #{city}
+        <if test="hospitalLevel != null and hospitalLevel != ''">
+            AND hospital_level = #{hospitalLevel}
+        </if>
+        ORDER BY hospital_name
+    </select>
 </mapper>
